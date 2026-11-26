@@ -47,7 +47,15 @@ app.use('/api/register', rateLimit(15, 60000));
 app.use('/api/login', rateLimit(15, 60000));
 
 app.use(express.json({ limit: '2mb' }));
-app.use(express.static(path.join(__dirname, 'public'), { index: false }));
+app.use(express.static(path.join(__dirname, 'public'), {
+  index: false,
+  maxAge: '1h',
+  setHeaders(res, filePath) {
+    if (/\.(html|json)$/.test(filePath)) {
+      res.setHeader('Cache-Control', 'no-cache');
+    }
+  }
+}));
 
 function computeBadges(user, db) {
   const badges = [];
@@ -209,6 +217,10 @@ app.get('/', (req, res) => {
   res.send(html);
 });
 
+app.get('/healthz', (req, res) => {
+  res.json({ status: 'ok', service: 'truecalo', timestamp: new Date().toISOString() });
+});
+
 // SEO: dynamic meta + JSON-LD for individual item URLs (/objeto/:id)
 app.get('/objeto/:id', (req, res) => {
   const db = readDb();
@@ -343,6 +355,9 @@ app.post('/api/register', (req, res) => {
   if (!name || !name.trim() || !emailValid || !password || password.length < 6) {
     return res.status(400).json({ error: 'Nombre, correo válido y contraseña (mín. 6 caracteres) son obligatorios.' });
   }
+  if (name.trim().length > 60 || bio && String(bio).trim().length > 160) {
+    return res.status(400).json({ error: 'El nombre o la biografía exceden la longitud permitida.' });
+  }
 
   const db = readDb();
   const normalizedEmail = email.trim().toLowerCase();
@@ -359,11 +374,12 @@ app.post('/api/register', (req, res) => {
     city: (city || 'Sin ubicación').trim(),
     bio: (bio || 'Miembro de por vida en TRUECALO.').trim(),
     avatarColor: pickColor(cleanName),
-    lifetimeMember: true,
-    plan: 'lifetime_20eur',
-    paidAmount: 20,
+    lifetimeMember: false,
+    plan: 'demo',
+    paymentStatus: 'pending',
+    paidAmount: 0,
     currency: 'EUR',
-    paymentMethod: paymentMethod || 'tarjeta',
+    paymentMethod: paymentMethod || 'pending',
     rating: 5.0,
     ratingCount: 0,
     completedTrades: 0,
@@ -632,6 +648,15 @@ app.post('/api/trades', (req, res) => {
   }
 
   const db = readDb();
+  const duplicate = db.trades.find(t =>
+    t.status === 'pendiente' &&
+    t.targetItemId === targetItemId &&
+    t.proposerId === proposerId &&
+    t.offeredItemId === (offeredItemId || null)
+  );
+  if (duplicate) {
+    return res.status(409).json({ error: 'Ya existe una propuesta pendiente con estos objetos.' });
+  }
   const targetItem = db.items.find(i => i.id === targetItemId);
   if (!targetItem) return res.status(404).json({ error: 'Objeto destino no encontrado.' });
   if (targetItem.status !== 'disponible') {
@@ -758,6 +783,25 @@ app.post('/api/trades/:id/messages', (req, res) => {
   res.status(201).json(enrichTrade(trade, db));
 });
 
-app.listen(PORT, () => {
-  console.log(`truecalo escuchando en http://localhost:${PORT}`);
+app.use('/api', (req, res) => {
+  res.status(404).json({ error: 'Endpoint API no encontrado.' });
 });
+
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    return res.status(400).json({ error: 'El cuerpo JSON no es válido.' });
+  }
+  if (err && err.type === 'entity.too.large') {
+    return res.status(413).json({ error: 'La petición supera el límite permitido.' });
+  }
+  console.error(err);
+  res.status(500).json({ error: 'Error interno del servidor.' });
+});
+
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`truecalo escuchando en http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;

@@ -5,10 +5,11 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.js",
+    "check": "node --check server.js && node --check db.js && node --check public/app.js",
+    "test": "node --test"
   },
   "dependencies": {
-    "express": "^4.21.2",
-    "react-zoom-pan-pinch": "^4.4.0"
+    "express": "^4.21.2"
   }
 }

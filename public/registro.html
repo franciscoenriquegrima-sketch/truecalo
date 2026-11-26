@@ -41,7 +41,7 @@
         </ul>
 
         <div class="plan-guarantee">
-          🔒 Entorno de registro conectado a tu comunidad local. Puedes conectar tu pasarela de pago (Stripe / Bizum / PayPal) cuando pases a producción.
+          🔒 <strong>Versión de demostración:</strong> la cuenta se crea sin cobrar ni activar una membresía real hasta conectar una pasarela y validar el pago.
         </div>
       </div>
 
@@ -77,10 +77,10 @@
           </label>
 
           <div class="payment-box">
-            <span class="payment-title">Método de pago único (20,00 €)</span>
+            <span class="payment-title">Registro de demostración — pago pendiente de integración</span>
             <div class="payment-methods">
               <label class="pay-option">
-                <input type="radio" name="paymentMethod" value="tarjeta" checked />
+                  <input type="radio" name="paymentMethod" value="pendiente" checked />
                 <span>💳 Tarjeta</span>
               </label>
               <label class="pay-option">
@@ -100,7 +100,7 @@
           </label>
 
           <button type="submit" class="btn btn-primary btn-lg" id="btnRegisterSubmit">
-            Pagar 20 € y activar cuenta de por vida
+            Crear cuenta de demostración
           </button>
           <p class="form-error hidden" id="regError"></p>
         </form>
@@ -155,7 +155,7 @@
         errorEl.textContent = err.message;
         errorEl.classList.remove('hidden');
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Pagar 20 € y activar cuenta de por vida';
+        submitBtn.textContent = 'Crear cuenta de demostración';
       }
     });
   </script>

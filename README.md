@@ -20,6 +20,16 @@ npm start
 
 La aplicación se inicia en `http://localhost:3000`. Los datos se persisten automáticamente en `data/db.json` (con datos iniciales de ejemplo la primera vez).
 
+## Comprobaciones
+
+```bash
+npm run check
+npm test
+npm audit
+```
+
+El proyecto incluye pruebas de humo para `/healthz`, registro con email inválido, rutas API desconocidas y protección básica contra eliminación de objetos sin propietario.
+
 ## Configurar Google AdSense
 
 Sustituye el identificador de ejemplo `ca-pub-0000000000000000` (y `pub-0000000000000000` en `public/ads.txt`) por tu ID real de editor en:

@@ -129,8 +129,12 @@ async function init() {
   }
 
   bindEvents();
-  await loadUsers();
-  await Promise.all([loadStats(), loadItems(), loadTrades()]);
+  try {
+    await loadUsers();
+  } catch (err) {
+    showToast('No se pudo cargar la comunidad. Comprueba tu conexión.', true);
+  }
+  await Promise.allSettled([loadStats(), loadItems(), loadTrades()]);
 
   if (urlParams.get('welcome') === '1' && state.currentUser) {
     showToast(`¡Bienvenido/a ${state.currentUser.name}! Tu membresía de por vida (20 €) está activa.`);
