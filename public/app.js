@@ -2,6 +2,7 @@ const state = {
   users: [],
   currentUser: null,
   items: [],
+  myAvailableItems: [],
   trades: [],
   filters: {
     q: '',
@@ -65,6 +66,42 @@ function getInitials(name = '') {
     .slice(0, 2)
     .map(p => p[0].toUpperCase())
     .join('') || '?';
+}
+
+function normalizeText(str = '') {
+  return str
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
+function computeBestMatch(targetItem, myItems) {
+  if (!targetItem || targetItem.type !== 'trueque' || targetItem.status !== 'disponible') return null;
+  if (!state.currentUser || targetItem.ownerId === state.currentUser.id || !myItems.length) return null;
+
+  const looking = normalizeText(`${targetItem.lookingFor} ${targetItem.title} ${targetItem.category}`);
+  const targetCity = normalizeText((targetItem.location || '').split(/[·,-]/)[0].trim());
+
+  let best = null;
+  for (const mine of myItems) {
+    const myWords = normalizeText(`${mine.title} ${mine.category}`)
+      .split(/\s+/)
+      .filter(w => w.length >= 4);
+
+    let hits = 0;
+    for (const w of myWords) {
+      if (looking.includes(w)) hits++;
+    }
+
+    const sameCity = targetCity && normalizeText(mine.location || '').includes(targetCity);
+    if (hits > 0 || (mine.category === targetItem.category && sameCity)) {
+      const score = Math.min(98, 72 + hits * 12 + (sameCity ? 8 : 0));
+      if (!best || score > best.score) {
+        best = { score, myItem: mine };
+      }
+    }
+  }
+  return best;
 }
 
 function formatRelativeDate(iso) {
@@ -140,6 +177,13 @@ async function loadItems() {
   }
 
   state.items = await api(`/api/items?${params.toString()}`);
+  if (state.currentUser) {
+    state.myAvailableItems = await api(
+      `/api/items?ownerId=${encodeURIComponent(state.currentUser.id)}&status=disponible`
+    );
+  } else {
+    state.myAvailableItems = [];
+  }
   renderItems();
 }
 
@@ -232,6 +276,16 @@ function renderItems() {
                 ${item.type === 'regalo' ? '🎁 Gratis para quien lo necesite' : escapeHtml(item.lookingFor)}
               </p>
             </div>
+            ${(() => {
+              const match = computeBestMatch(item, state.myAvailableItems);
+              if (!match) return '';
+              return `
+                <div class="match-banner">
+                  <strong>🤖 Coincidencia: ${match.score}%</strong>
+                  <span>Tu ${escapeHtml(match.myItem.title)} encaja con este trueque</span>
+                </div>
+              `;
+            })()}
             <div class="card-footer">
               <span class="owner-chip">
                 <span class="avatar" style="width:32px;height:32px;font-size:0.78rem;background:${escapeHtml(item.ownerAvatarColor)}">${getInitials(item.ownerName)}</span>
@@ -283,11 +337,27 @@ async function openItemDetail(itemId) {
       </div>
     `;
   } else {
+    const bestMatch = computeBestMatch(item, myAvailable);
     const offerOptions = myAvailable.length
-      ? myAvailable.map(m => `<option value="${m.id}">${escapeHtml(m.title)}</option>`).join('')
+      ? myAvailable
+          .map(
+            m =>
+              `<option value="${m.id}" ${bestMatch?.myItem.id === m.id ? 'selected' : ''}>${escapeHtml(m.title)}</option>`
+          )
+          .join('')
+      : '';
+
+    const matchHtml = bestMatch
+      ? `
+        <div class="match-banner">
+          <strong>🤖 Coincidencia: ${bestMatch.score}%</strong>
+          <span>Tu ${escapeHtml(bestMatch.myItem.title)} encaja con este trueque</span>
+        </div>
+      `
       : '';
 
     actionHtml = `
+      ${matchHtml}
       <form class="propose-box form-stack" id="proposeTradeForm">
         <h3 style="margin:0">${item.type === 'regalo' ? 'Solicitar este regalo' : 'Proponer un trueque'}</h3>
         ${
@@ -822,9 +892,8 @@ function bindEvents() {
       if (state.filters.nearMe) {
         const city = getUserCityKeyword();
         $('#btnNearMe').textContent = `📍 Cerca de ${city} ✕`;
-        await loadItems();
       }
-      await loadTrades();
+      await Promise.all([loadItems(), loadTrades()]);
       showToast(`Ahora estás usando el perfil de ${found.name}`);
       closeModal('profileModal');
     }
