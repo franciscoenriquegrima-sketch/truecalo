@@ -60,6 +60,7 @@ body {
 .brand {
   display: flex;
   align-items: center;
+  gap: 10px;
   text-decoration: none;
 }
 
@@ -67,6 +68,45 @@ body {
   height: 52px;
   width: auto;
   display: block;
+}
+
+.brand-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #00D68F 0%, #00B8FF 100%);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 1.15rem;
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.brand-text-wrap {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.brand-title {
+  font-weight: 800;
+  font-size: 1.12rem;
+  color: #111827;
+  letter-spacing: -0.02em;
+}
+
+.brand-title-accent {
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.brand-slogan {
+  font-size: 0.74rem;
+  color: var(--muted);
+  font-weight: 500;
 }
 
 .search-bar {
@@ -77,8 +117,14 @@ body {
   gap: 8px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 8px 16px;
+  border-radius: 16px;
+  height: 46px;
+  padding: 0 14px;
+  transition: border-color 0.15s ease;
+}
+
+.search-bar:focus-within {
+  border-color: var(--cyan);
 }
 
 .search-bar input {
@@ -1324,6 +1370,88 @@ textarea {
 }
 
 @media (max-width: 780px) {
+  .nav-inner {
+    padding: 10px 0 12px;
+    gap: 10px;
+  }
+
+  .brand {
+    order: 1;
+  }
+
+  .nav-actions {
+    order: 2;
+    margin-left: auto;
+    gap: 8px;
+  }
+
+  .search-bar {
+    order: 3;
+    flex-basis: 100%;
+    min-width: 100%;
+    height: 48px;
+  }
+
+  .pub-label {
+    display: none;
+  }
+
+  #btnOpenPublish {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 1.2rem;
+  }
+
+  .user-pill {
+    padding: 4px;
+  }
+
+  .user-pill .user-name {
+    display: none;
+  }
+
+  .user-pill .avatar {
+    width: 32px;
+    height: 32px;
+  }
+
+  .hero-inner {
+    padding: 22px 18px;
+  }
+
+  .hero-logo {
+    height: 52px;
+  }
+
+  .hero-search-box {
+    flex-direction: column;
+    border-radius: 16px;
+    padding: 10px;
+  }
+
+  .category-pills {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    width: 100%;
+    scrollbar-width: none;
+  }
+
+  .category-pills::-webkit-scrollbar {
+    display: none;
+  }
+
+  .pill {
+    white-space: nowrap;
+  }
+
+  .secondary-filters {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
   .hero-inner,
   .detail-layout,
   .form-row {
