@@ -504,7 +504,7 @@ async function openItemDetail(itemId) {
             .map(
               (src, i) => `
             <div class="detail-slide detail-zoom-wrap" data-slide="${i}" title="Pellizca, arrastra o haz doble clic para ampliar">
-              <img class="detail-img" src="${escapeHtml(src)}" alt="${escapeHtml(item.title)} (${i + 1})" decoding="async" draggable="false" onerror="this.outerHTML='<div class=\\'detail-img card-placeholder\\'>📦</div>'" />
+              <img class="detail-img" src="${escapeHtml(src)}" alt="${escapeHtml(item.title)} (${i + 1})" ${i > 0 ? 'loading="lazy"' : ''} decoding="async" draggable="false" onerror="this.outerHTML='<div class=\\'detail-img card-placeholder\\'>📦</div>'" />
               <span class="zoom-level-badge">🔍 Pellizca o doble toque</span>
             </div>
           `
@@ -654,7 +654,7 @@ async function openItemDetail(itemId) {
             .map(
               (src, i) => `
             <div class="detail-slide detail-zoom-wrap">
-              <img class="lightbox-img" src="${escapeHtml(src)}" alt="${escapeHtml(item.title)} (${i + 1})" draggable="false" />
+              <img class="lightbox-img" src="${escapeHtml(src)}" alt="${escapeHtml(item.title)} (${i + 1})" loading="lazy" decoding="async" draggable="false" />
               <span class="zoom-level-badge">🔍 Pellizca o doble toque</span>
             </div>
           `
