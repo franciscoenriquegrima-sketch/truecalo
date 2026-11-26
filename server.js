@@ -14,6 +14,7 @@ app.use((req, res, next) => {
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
   res.setHeader('X-DNS-Prefetch-Control', 'off');
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
   next();
 });
 
@@ -23,6 +24,11 @@ function rateLimit(maxRequests, windowMs = 60000) {
   return (req, res, next) => {
     const key = `${req.ip || 'local'}:${maxRequests}`;
     const now = Date.now();
+    if (rateBuckets.size > 5000) {
+      for (const [k, v] of rateBuckets) {
+        if (now > v.resetAt) rateBuckets.delete(k);
+      }
+    }
     const entry = rateBuckets.get(key);
     if (!entry || now > entry.resetAt) {
       rateBuckets.set(key, { count: 1, resetAt: now + windowMs });
@@ -333,7 +339,8 @@ app.get('/api/users/:id/history', (req, res) => {
 
 app.post('/api/register', (req, res) => {
   const { name, email, city, password, bio, paymentMethod } = req.body || {};
-  if (!name || !name.trim() || !email || !email.trim() || !password || password.length < 6) {
+  const emailValid = typeof email === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  if (!name || !name.trim() || !emailValid || !password || password.length < 6) {
     return res.status(400).json({ error: 'Nombre, correo válido y contraseña (mín. 6 caracteres) son obligatorios.' });
   }
 
@@ -408,12 +415,12 @@ app.put('/api/users/:id', (req, res) => {
   const user = db.users.find(u => u.id === req.params.id);
   if (!user) return res.status(404).json({ error: 'Usuario no encontrado.' });
 
-  if (name && name.trim()) user.name = name.trim();
-  if (typeof city === 'string') user.city = city.trim() || 'Sin ubicación';
-  if (typeof bio === 'string') user.bio = bio.trim();
+  if (name && name.trim()) user.name = clampStr(name, 60);
+  if (typeof city === 'string') user.city = clampStr(city, 100) || 'Sin ubicación';
+  if (typeof bio === 'string') user.bio = clampStr(bio, 200);
 
   writeDb(db);
-  res.json(sanitizeUser(user));
+  res.json(sanitizeUser(user, db));
 });
 
 // Items
