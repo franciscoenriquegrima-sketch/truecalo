@@ -105,10 +105,9 @@ async function loadUsers() {
 
 async function loadStats() {
   const stats = await api('/api/stats');
-  $('#statAvailable').textContent = stats.availableItems;
-  $('#statSecondLife').textContent = stats.secondLifeItems;
-  $('#statGifts').textContent = stats.giftsCount;
-  $('#statUsers').textContent = stats.totalUsers;
+  $('#statCompletedTrades').textContent = stats.completedTrades.toLocaleString('es-ES');
+  $('#statGifts').textContent = stats.giftsCount.toLocaleString('es-ES');
+  $('#statUsers').textContent = stats.totalUsers.toLocaleString('es-ES');
 }
 
 function getUserCityKeyword() {
@@ -549,12 +548,27 @@ function bindEvents() {
 
   // Search & filters
   let searchTimer;
-  $('#searchInput').addEventListener('input', e => {
+  function handleSearchInput(val) {
+    $('#searchInput').value = val;
+    $('#heroSearchInput').value = val;
     clearTimeout(searchTimer);
     searchTimer = setTimeout(() => {
-      state.filters.q = e.target.value;
+      state.filters.q = val;
       loadItems();
     }, 220);
+  }
+
+  $('#searchInput').addEventListener('input', e => handleSearchInput(e.target.value));
+  $('#heroSearchInput').addEventListener('input', e => handleSearchInput(e.target.value));
+  $('#heroSearchInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+  $('#btnHeroSearch').addEventListener('click', () => {
+    handleSearchInput($('#heroSearchInput').value);
+    document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth' });
   });
 
   $('#categoryPills').addEventListener('click', e => {

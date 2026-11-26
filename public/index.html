@@ -97,30 +97,24 @@
     <section class="hero">
       <div class="container hero-inner">
         <div class="hero-copy">
-          <span class="hero-tag">Economía circular entre vecinos</span>
-          <h1>Lo que ya no usas puede ser el tesoro de alguien más.</h1>
-          <p>Publica objetos que tengas guardados, propón trueques justos o regálalos para darles una segunda vida sin gastar dinero.</p>
+          <div class="hero-brand-row">
+            <img src="/logo.svg" alt="TRUECALO — Si te interesa, cámbialo" class="hero-logo" />
+          </div>
+          <h1>🔍 ¿Qué buscas hoy?</h1>
+          <div class="hero-search-box">
+            <input type="search" id="heroSearchInput" placeholder="Buscar artículos, ciudades..." aria-label="Buscar artículos o ciudades" />
+            <button type="button" class="btn btn-primary" id="btnHeroSearch">Buscar</button>
+          </div>
+
+          <ul class="hero-check-stats" aria-label="Impacto de la comunidad">
+            <li>✅ <strong id="statCompletedTrades">0</strong> trueques realizados</li>
+            <li>✅ <strong id="statGifts">0</strong> regalos solidarios</li>
+            <li>✅ <strong id="statUsers">0</strong> usuarios activos</li>
+          </ul>
+
           <div class="hero-cta">
-            <button class="btn btn-primary btn-lg" id="btnHeroPublish">Publicar mi primer objeto</button>
-            <a href="#catalogo" class="btn btn-ghost btn-lg">Explorar objetos ↓</a>
-          </div>
-        </div>
-        <div class="stats-card" aria-label="Impacto de la comunidad">
-          <div class="stat">
-            <strong id="statAvailable">0</strong>
-            <span>Objetos disponibles</span>
-          </div>
-          <div class="stat">
-            <strong id="statSecondLife">0</strong>
-            <span>Segundas vidas dadas</span>
-          </div>
-          <div class="stat">
-            <strong id="statGifts">0</strong>
-            <span>Regalos solidarios</span>
-          </div>
-          <div class="stat">
-            <strong id="statUsers">0</strong>
-            <span>Personas truecando</span>
+            <button class="btn btn-primary btn-lg" id="btnHeroPublish">Publicar objeto</button>
+            <a href="#catalogo" class="btn btn-outline btn-lg">Explorar</a>
           </div>
         </div>
       </div>

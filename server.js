@@ -223,7 +223,9 @@ function pickColor(str) {
 app.get('/api/stats', (req, res) => {
   const db = readDb();
   const availableItems = db.items.filter(i => i.status === 'disponible').length;
-  const completedTrades = db.trades.filter(t => t.status === 'completado' || t.status === 'aceptado').length;
+  const userCompleted = db.users.reduce((sum, u) => sum + (u.completedTrades || 0), 0);
+  const tradeCompleted = db.trades.filter(t => t.status === 'completado' || t.status === 'aceptado').length;
+  const completedTrades = Math.max(userCompleted, tradeCompleted);
   const secondLifeItems = db.items.filter(i => i.status === 'intercambiado').length;
   const giftsCount = db.items.filter(i => i.type === 'regalo').length;
 
