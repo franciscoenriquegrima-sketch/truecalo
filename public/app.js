@@ -195,6 +195,22 @@ async function loadItems() {
   renderItems();
 }
 
+function getCategoryIcon(category = '') {
+  const map = {
+    Tecnología: '📱',
+    Videojuegos: '🎮',
+    Hogar: '🏠',
+    Moda: '👕',
+    Libros: '📚',
+    Deportes: '⚽',
+    Música: '🎵',
+    Herramientas: '🛠',
+    Motor: '🚗',
+    Coleccionismo: '🎨'
+  };
+  return map[category] || '📦';
+}
+
 function renderMatchesModule() {
   const mod = $('#matchesModule');
   const grid = $('#matchesGrid');
@@ -221,13 +237,13 @@ function renderMatchesModule() {
       m => `
       <button type="button" class="match-pair-card" data-match-item="${m.item.id}">
         <div class="match-pair-top">
-          <span class="match-pair-pct">🤖 ${m.score}% coincidencia</span>
+          <span class="match-pair-pct">${m.score}% compatible</span>
           <span class="match-pair-loc">📍 ${escapeHtml(m.item.location)}</span>
         </div>
         <div class="match-pair-row">
-          <span class="match-mine">Tu ${escapeHtml(m.myItem.title)}</span>
+          <span class="match-mine">${getCategoryIcon(m.myItem.category)} ${escapeHtml(m.myItem.title)}</span>
           <span class="match-arrow" aria-hidden="true">↔</span>
-          <span class="match-theirs">${escapeHtml(m.item.title)}</span>
+          <span class="match-theirs">${getCategoryIcon(m.item.category)} ${escapeHtml(m.item.title)}</span>
         </div>
       </button>
     `
