@@ -791,6 +791,7 @@ html.dark .match-pair-pct {
   box-shadow: var(--shadow);
 }
 
+.product-image,
 .card-media {
   position: relative;
   width: 100%;
