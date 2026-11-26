@@ -775,6 +775,43 @@ textarea {
   border-radius: 8px;
 }
 
+.card-trust-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.trust-pill {
+  background: #f1f5f9;
+  color: var(--text);
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 8px;
+}
+
+.trust-box {
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+
+.trust-history {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.history-list {
+  margin: 6px 0 0;
+  padding-left: 16px;
+}
+
 .card-footer {
   margin-top: auto;
   padding-top: 10px;

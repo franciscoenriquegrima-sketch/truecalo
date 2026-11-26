@@ -336,13 +336,15 @@ function renderItems() {
                 </div>
               `;
             })()}
+            <div class="card-trust-strip" aria-label="Métricas de confianza">
+              <span class="trust-pill">⭐ ${(item.ownerRating ?? 5).toFixed(1)}</span>
+              <span class="trust-pill">🏅 ${escapeHtml(item.ownerLevel || 'Nivel 1 · Nuevo')}</span>
+              <span class="trust-pill">♻️ ${item.ownerCompletedTrades || 0} trueques</span>
+            </div>
             <div class="card-footer">
               <span class="owner-chip">
                 <span class="avatar" style="width:32px;height:32px;font-size:0.78rem;background:${escapeHtml(item.ownerAvatarColor)}">${getInitials(item.ownerName)}</span>
-                <span>
-                  <span class="owner-name-text">${escapeHtml(item.ownerName)}</span>
-                  <span class="mini-rating" title="${item.ownerCompletedTrades || 0} trueques completados">★ ${(item.ownerRating ?? 5).toFixed(1)}</span>
-                </span>
+                <span class="owner-name-text">${escapeHtml(item.ownerName)}</span>
               </span>
               <button type="button" class="btn-card-view" aria-label="Ver detalles de ${escapeHtml(item.title)}">Ver artículo</button>
             </div>
@@ -610,19 +612,22 @@ async function openItemDetail(itemId) {
         ${item.type === 'regalo' ? '🎁 Regalo gratuito' : `🔄 Busca: ${escapeHtml(item.lookingFor)}`}
       </p>
       <p class="detail-desc">${escapeHtml(item.description)}</p>
-      <div class="owner-chip">
-        <span class="avatar" style="background:${escapeHtml(item.ownerAvatarColor)}">${getInitials(item.ownerName)}</span>
-        <div>
-          <div>Publicado por <strong>${escapeHtml(item.ownerName)}</strong></div>
-          <div class="reputation-line">
-            <span>♻️ <strong>${item.ownerCompletedTrades || 0}</strong> trueques realizados</span>
-            <span class="rep-sep">·</span>
-            <span>⭐ <strong>${(item.ownerRating ?? 5).toFixed(1)}</strong></span>
-            <span class="rep-sep">·</span>
-            <span>📅 ${formatRelativeDate(item.createdAt)}</span>
+      <div class="trust-box">
+        <div class="owner-chip">
+          <span class="avatar" style="background:${escapeHtml(item.ownerAvatarColor)}">${getInitials(item.ownerName)}</span>
+          <div>
+            <div>Publicado por <strong>${escapeHtml(item.ownerName)}</strong></div>
+            <div class="reputation-line">
+              <span>⭐ <strong>${(item.ownerRating ?? 5).toFixed(1)}</strong></span>
+              <span class="rep-sep">·</span>
+              <span>🏅 <strong>${escapeHtml(item.ownerLevel || 'Nivel 1 · Nuevo')}</strong></span>
+              <span class="rep-sep">·</span>
+              <span>♻️ <strong>${item.ownerCompletedTrades || 0}</strong> trueques realizados</span>
+            </div>
+            ${badgesHtml ? `<div class="badges-row">${badgesHtml}</div>` : ''}
           </div>
-          ${badgesHtml ? `<div class="badges-row">${badgesHtml}</div>` : ''}
         </div>
+        <div class="trust-history" id="ownerHistoryBox">Cargando historial de intercambios...</div>
       </div>
       ${actionHtml}
     </div>
@@ -726,6 +731,28 @@ async function openItemDetail(itemId) {
     history.pushState({}, '', `/objeto/${encodeURIComponent(item.id)}`);
   }
   document.title = `${item.title} — ${item.type === 'regalo' ? 'Regalo' : 'Trueque'} en truecalo`;
+
+  api(`/api/users/${encodeURIComponent(item.ownerId)}/history`)
+    .then(data => {
+      const box = $('#ownerHistoryBox');
+      if (!box) return;
+      if (!data.recentTrades?.length) {
+        box.innerHTML = `<span class="history-empty">📜 Historial: ${item.ownerCompletedTrades || 0} intercambios completados en la comunidad.</span>`;
+        return;
+      }
+      box.innerHTML = `
+        <strong>📜 Últimos intercambios:</strong>
+        <ul class="history-list">
+          ${data.recentTrades
+            .map(
+              t =>
+                `<li>✓ ${escapeHtml(t.targetTitle)} ⇄ ${escapeHtml(t.offeredTitle)} (${formatRelativeDate(t.date)})</li>`
+            )
+            .join('')}
+        </ul>
+      `;
+    })
+    .catch(() => {});
 }
 
 function openPublishModal(itemToEdit = null) {

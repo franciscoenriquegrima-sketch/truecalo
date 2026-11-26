@@ -57,6 +57,15 @@ function computeBadges(user, db) {
   return badges;
 }
 
+function computeUserLevel(user) {
+  const completed = user.completedTrades || 0;
+  if (completed >= 100) return 'Nivel 5 · Leyenda';
+  if (completed >= 30) return 'Nivel 4 · Maestro';
+  if (completed >= 15) return 'Nivel 3 · Experto';
+  if (completed >= 5) return 'Nivel 2 · Activo';
+  return 'Nivel 1 · Nuevo';
+}
+
 function sanitizeUser(user, db = null) {
   if (!user) return null;
   return {
@@ -68,6 +77,7 @@ function sanitizeUser(user, db = null) {
     lifetimeMember: Boolean(user.lifetimeMember),
     rating: typeof user.rating === 'number' ? Number(user.rating.toFixed(1)) : 5.0,
     completedTrades: user.completedTrades || 0,
+    level: computeUserLevel(user),
     badges: computeBadges(user, db),
     createdAt: user.createdAt
   };
@@ -294,6 +304,33 @@ app.get('/api/users', (req, res) => {
   res.json(db.users.map(u => sanitizeUser(u, db)));
 });
 
+app.get('/api/users/:id/history', (req, res) => {
+  const db = readDb();
+  const user = db.users.find(u => u.id === req.params.id);
+  if (!user) return res.status(404).json({ error: 'Usuario no encontrado.' });
+
+  const userTrades = db.trades
+    .filter(t => (t.proposerId === user.id || t.receiverId === user.id) && (t.status === 'completado' || t.status === 'aceptado'))
+    .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+    .slice(0, 5)
+    .map(t => {
+      const target = db.items.find(i => i.id === t.targetItemId);
+      const offered = t.offeredItemId ? db.items.find(i => i.id === t.offeredItemId) : null;
+      return {
+        id: t.id,
+        status: t.status,
+        targetTitle: target ? target.title : 'Artículo intercambiado',
+        offeredTitle: offered ? offered.title : 'Acuerdo directo',
+        date: t.updatedAt
+      };
+    });
+
+  res.json({
+    user: sanitizeUser(user, db),
+    recentTrades: userTrades
+  });
+});
+
 app.post('/api/register', (req, res) => {
   const { name, email, city, password, bio, paymentMethod } = req.body || {};
   if (!name || !name.trim() || !email || !email.trim() || !password || password.length < 6) {
@@ -392,6 +429,7 @@ app.get('/api/items', (req, res) => {
       ownerAvatarColor: owner ? owner.avatarColor : '#4F46E5',
       ownerRating: owner && typeof owner.rating === 'number' ? Number(owner.rating.toFixed(1)) : 5.0,
       ownerCompletedTrades: owner ? (owner.completedTrades || 0) : 0,
+      ownerLevel: owner ? computeUserLevel(owner) : 'Nivel 1 · Nuevo',
       ownerBadges: owner ? computeBadges(owner, db) : []
     };
   });
