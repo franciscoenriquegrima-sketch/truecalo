@@ -1,0 +1,18 @@
+{
+  "name": "Truecalo",
+  "short_name": "Truecalo",
+  "description": "Plataforma de trueque y segunda vida entre vecinos. Si te interesa, cámbialo.",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#00D68F",
+  "background_color": "#ffffff",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
