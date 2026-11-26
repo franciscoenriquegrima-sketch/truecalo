@@ -498,7 +498,7 @@ async function openItemDetail(itemId) {
   const mediaHtml = gallery.length
     ? `
       <div class="detail-gallery-wrap">
-        <button type="button" class="btn-fullscreen" id="btnOpenFullscreen" aria-label="Ver a pantalla completa" title="Pantalla completa">⛶</button>
+        <button type="button" class="btn-fullscreen" id="btnOpenFullscreen" aria-label="Ampliar imagen" title="Ampliar imagen">🔍</button>
         <div class="detail-gallery" id="detailGallery">
           ${gallery
             .map(
