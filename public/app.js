@@ -776,6 +776,21 @@ function bindEvents() {
     loadItems();
   });
 
+  // Mobile bottom navigation
+  $('#mobNavHome')?.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  $('#mobNavSearch')?.addEventListener('click', () => {
+    $('#searchInput')?.focus();
+    document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth' });
+  });
+  $('#mobNavPublish')?.addEventListener('click', () => openPublishModal());
+  $('#mobNavTrades')?.addEventListener('click', () => {
+    openModal('tradesModal');
+    renderTradesModal();
+  });
+  $('#mobNavProfile')?.addEventListener('click', () => openModal('profileModal'));
+
   $('#userSwitcher').addEventListener('change', async e => {
     const found = state.users.find(u => u.id === e.target.value);
     if (found) {
