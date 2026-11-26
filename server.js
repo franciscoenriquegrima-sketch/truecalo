@@ -12,10 +12,35 @@ app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+  res.setHeader('X-DNS-Prefetch-Control', 'off');
   next();
 });
 
-app.use(express.json({ limit: '5mb' }));
+// Simple in-memory rate limiter for API routes
+const rateBuckets = new Map();
+function rateLimit(maxRequests, windowMs = 60000) {
+  return (req, res, next) => {
+    const key = `${req.ip || 'local'}:${maxRequests}`;
+    const now = Date.now();
+    const entry = rateBuckets.get(key);
+    if (!entry || now > entry.resetAt) {
+      rateBuckets.set(key, { count: 1, resetAt: now + windowMs });
+      return next();
+    }
+    entry.count++;
+    if (entry.count > maxRequests) {
+      return res.status(429).json({ error: 'Demasiadas peticiones. Espera un momento e inténtalo de nuevo.' });
+    }
+    next();
+  };
+}
+
+app.use('/api/', rateLimit(120, 60000));
+app.use('/api/register', rateLimit(15, 60000));
+app.use('/api/login', rateLimit(15, 60000));
+
+app.use(express.json({ limit: '2mb' }));
 app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
 function computeBadges(user, db) {
@@ -64,7 +89,28 @@ function verifyPassword(password, stored) {
 
 function isSafeImageUrl(url) {
   if (!url) return true;
-  return /^https?:\/\//i.test(url) || /^data:image\/(png|jpeg|jpg|webp|gif|svg\+xml);base64,/i.test(url);
+  if (url.length > 1500000) return false;
+  if (/^data:image\/(png|jpeg|jpg|webp|gif);base64,[A-Za-z0-9+/=]+$/i.test(url)) {
+    return true;
+  }
+  if (url.length > 2048) return false;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+function safeJsonLd(obj) {
+  return JSON.stringify(obj)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026');
+}
+
+function clampStr(str, max) {
+  return typeof str === 'string' ? str.trim().slice(0, max) : '';
 }
 
 function escapeXml(str = '') {
@@ -77,7 +123,11 @@ function escapeXml(str = '') {
 }
 
 function getBaseUrl(req) {
-  return `${req.protocol}://${req.get('host')}`;
+  if (process.env.PUBLIC_URL) return process.env.PUBLIC_URL.replace(/\/+$/, '');
+  const host = req.get('host') || '';
+  const safeHost = /^[a-zA-Z0-9.-]+(:\d+)?$/.test(host) ? host : `localhost:${PORT}`;
+  const proto = req.protocol === 'https' ? 'https' : 'http';
+  return `${proto}://${safeHost}`;
 }
 
 // SEO: robots.txt
@@ -203,7 +253,7 @@ app.get('/objeto/:id', (req, res) => {
     )
     .replace(
       '</head>',
-      `  <script type="application/ld+json">${JSON.stringify(productLd)}</script>\n</head>`
+      `  <script type="application/ld+json">${safeJsonLd(productLd)}</script>\n</head>`
     );
 
   res.send(html);
@@ -394,16 +444,16 @@ app.post('/api/items', (req, res) => {
   const newItem = {
     id: generateId('itm_'),
     ownerId,
-    title: title.trim(),
-    description: description.trim(),
-    category: category || 'Otros',
-    condition: condition || 'Buen estado',
+    title: clampStr(title, 100),
+    description: clampStr(description, 2000),
+    category: clampStr(category || 'Otros', 50),
+    condition: clampStr(condition || 'Buen estado', 40),
     type: itemType,
     lookingFor: itemType === 'regalo'
       ? '¡Gratis! Segunda vida para quien lo necesite'
-      : (lookingFor || 'Abierto a propuestas interesantes').trim(),
-    location: (location || owner.city || 'Sin ubicación').trim(),
-    imageUrl: (imageUrl || '').trim(),
+      : clampStr(lookingFor || 'Abierto a propuestas interesantes', 200),
+    location: clampStr(location || owner.city || 'Sin ubicación', 100),
+    imageUrl: cleanImg,
     status: 'disponible',
     createdAt: new Date().toISOString()
   };
@@ -424,17 +474,17 @@ app.put('/api/items/:id', (req, res) => {
   if (!item) return res.status(404).json({ error: 'Objeto no encontrado.' });
 
   const { userId, title, description, category, condition, type, lookingFor, location, imageUrl, status } = req.body || {};
-  if (userId && item.ownerId !== userId) {
+  if (!userId || item.ownerId !== userId) {
     return res.status(403).json({ error: 'No tienes permiso para editar este objeto.' });
   }
 
-  if (title && title.trim()) item.title = title.trim();
-  if (description && description.trim()) item.description = description.trim();
-  if (category) item.category = category;
-  if (condition) item.condition = condition;
+  if (title && title.trim()) item.title = clampStr(title, 100);
+  if (description && description.trim()) item.description = clampStr(description, 2000);
+  if (category) item.category = clampStr(category, 50);
+  if (condition) item.condition = clampStr(condition, 40);
   if (type === 'trueque' || type === 'regalo') item.type = type;
-  if (typeof lookingFor === 'string') item.lookingFor = lookingFor.trim();
-  if (typeof location === 'string') item.location = location.trim();
+  if (typeof lookingFor === 'string') item.lookingFor = clampStr(lookingFor, 200);
+  if (typeof location === 'string') item.location = clampStr(location, 100);
   if (typeof imageUrl === 'string') {
     const cleanImg = imageUrl.trim();
     if (!isSafeImageUrl(cleanImg)) {
@@ -454,7 +504,7 @@ app.delete('/api/items/:id', (req, res) => {
   if (idx === -1) return res.status(404).json({ error: 'Objeto no encontrado.' });
 
   const userId = req.query.userId;
-  if (userId && db.items[idx].ownerId !== userId) {
+  if (!userId || db.items[idx].ownerId !== userId) {
     return res.status(403).json({ error: 'No tienes permiso para eliminar este objeto.' });
   }
 
@@ -488,11 +538,12 @@ function enrichTrade(trade, db) {
 app.get('/api/trades', (req, res) => {
   const db = readDb();
   const { userId } = req.query;
-  let trades = db.trades;
-  if (userId) {
-    trades = trades.filter(t => t.proposerId === userId || t.receiverId === userId);
+  if (!userId) {
+    return res.status(400).json({ error: 'Se requiere userId para consultar tus trueques.' });
   }
-  trades.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+  const trades = db.trades
+    .filter(t => t.proposerId === userId || t.receiverId === userId)
+    .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
   res.json(trades.map(t => enrichTrade(t, db)));
 });
 
@@ -613,12 +664,15 @@ app.post('/api/trades/:id/messages', (req, res) => {
   const db = readDb();
   const trade = db.trades.find(t => t.id === req.params.id);
   if (!trade) return res.status(404).json({ error: 'Propuesta no encontrada.' });
+  if (trade.proposerId !== senderId && trade.receiverId !== senderId) {
+    return res.status(403).json({ error: 'No tienes permiso para escribir en este trueque.' });
+  }
 
   const now = new Date().toISOString();
   trade.messages.push({
     id: generateId('msg_'),
     senderId,
-    text: text.trim(),
+    text: clampStr(text, 1000),
     createdAt: now
   });
   trade.updatedAt = now;
