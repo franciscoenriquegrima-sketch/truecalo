@@ -364,12 +364,12 @@ body {
   align-items: center;
   gap: 10px;
   max-width: 720px;
-  height: 62px;
+  height: 56px;
   margin: 0 auto 14px;
   background: var(--surface);
   border: 2px solid #00B8FF;
-  border-radius: 999px;
-  padding: 6px 6px 6px 20px;
+  border-radius: 16px;
+  padding: 6px 6px 6px 18px;
   box-shadow: 0 14px 34px rgba(0, 184, 255, 0.18);
   transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
@@ -391,13 +391,14 @@ body {
   outline: none;
   background: transparent;
   font-family: inherit;
-  font-size: 1.05rem;
+  font-size: 1.125rem;
   color: var(--text);
 }
 
 .btn-hero-search {
-  height: 48px;
-  padding: 0 26px;
+  height: 44px;
+  border-radius: 12px;
+  padding: 0 24px;
   font-size: 0.98rem;
 }
 
