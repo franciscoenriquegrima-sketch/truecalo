@@ -18,7 +18,21 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: '5mb' }));
 app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
-function sanitizeUser(user) {
+function computeBadges(user, db) {
+  const badges = [];
+  const completed = user.completedTrades || 0;
+  const userItems = db ? db.items.filter(i => i.ownerId === user.id) : [];
+  const hasGifts = userItems.some(i => i.type === 'regalo');
+
+  if (completed >= 100) badges.push('🏆 100 intercambios');
+  if (completed >= 10) badges.push('🥇 Trueque Experto');
+  if (completed >= 1 || userItems.length >= 1) badges.push('♻️ Eco Amigo');
+  if (hasGifts) badges.push('🎁 Donante Solidario');
+
+  return badges;
+}
+
+function sanitizeUser(user, db = null) {
   if (!user) return null;
   return {
     id: user.id,
@@ -27,6 +41,9 @@ function sanitizeUser(user) {
     bio: user.bio,
     avatarColor: user.avatarColor,
     lifetimeMember: Boolean(user.lifetimeMember),
+    rating: typeof user.rating === 'number' ? Number(user.rating.toFixed(1)) : 5.0,
+    completedTrades: user.completedTrades || 0,
+    badges: computeBadges(user, db),
     createdAt: user.createdAt
   };
 }
@@ -222,7 +239,7 @@ app.get('/api/stats', (req, res) => {
 // Users
 app.get('/api/users', (req, res) => {
   const db = readDb();
-  res.json(db.users.map(sanitizeUser));
+  res.json(db.users.map(u => sanitizeUser(u, db)));
 });
 
 app.post('/api/register', (req, res) => {
@@ -251,6 +268,9 @@ app.post('/api/register', (req, res) => {
     paidAmount: 20,
     currency: 'EUR',
     paymentMethod: paymentMethod || 'tarjeta',
+    rating: 5.0,
+    ratingCount: 0,
+    completedTrades: 0,
     createdAt: new Date().toISOString()
   };
 
@@ -317,7 +337,10 @@ app.get('/api/items', (req, res) => {
     return {
       ...item,
       ownerName: owner ? owner.name : 'Usuario',
-      ownerAvatarColor: owner ? owner.avatarColor : '#2d6a4f'
+      ownerAvatarColor: owner ? owner.avatarColor : '#4F46E5',
+      ownerRating: owner && typeof owner.rating === 'number' ? Number(owner.rating.toFixed(1)) : 5.0,
+      ownerCompletedTrades: owner ? (owner.completedTrades || 0) : 0,
+      ownerBadges: owner ? computeBadges(owner, db) : []
     };
   });
 
@@ -560,7 +583,13 @@ app.patch('/api/trades/:id', (req, res) => {
     if (trade.receiverId !== userId && trade.proposerId !== userId) {
       return res.status(403).json({ error: 'No participas en este trueque.' });
     }
-    trade.status = 'completado';
+    if (trade.status !== 'completado') {
+      trade.status = 'completado';
+      [trade.proposerId, trade.receiverId].forEach(uid => {
+        const u = db.users.find(usr => usr.id === uid);
+        if (u) u.completedTrades = (u.completedTrades || 0) + 1;
+      });
+    }
   } else {
     return res.status(400).json({ error: 'Acción no válida.' });
   }

@@ -17,6 +17,9 @@ function createSeedData() {
       city: 'Madrid · Malasaña',
       bio: 'Amante del diseño, la lectura y darle una segunda vida a las cosas.',
       avatarColor: '#2d6a4f',
+      rating: 4.9,
+      ratingCount: 32,
+      completedTrades: 32,
       createdAt: '2026-10-15T10:00:00.000Z'
     },
     {
@@ -25,6 +28,9 @@ function createSeedData() {
       city: 'Barcelona · Gràcia',
       bio: 'Ciclista urbano y aficionado a la música y el café de especialidad.',
       avatarColor: '#b5651d',
+      rating: 4.8,
+      ratingCount: 19,
+      completedTrades: 19,
       createdAt: '2026-10-18T14:30:00.000Z'
     },
     {
@@ -33,6 +39,9 @@ function createSeedData() {
       city: 'Valencia · Ruzafa',
       bio: 'Minimalista en proceso. Prefiero intercambiar antes que comprar nuevo.',
       avatarColor: '#3d5a80',
+      rating: 5.0,
+      ratingCount: 24,
+      completedTrades: 24,
       createdAt: '2026-10-20T09:15:00.000Z'
     }
   ];

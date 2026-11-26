@@ -461,7 +461,59 @@ textarea {
 .owner-chip {
   display: inline-flex;
   align-items: center;
+  gap: 8px;
+}
+
+.mini-rating {
+  color: #d97706;
+  font-weight: 700;
+  font-size: 0.78rem;
+}
+
+.reputation-line {
+  display: flex;
+  align-items: center;
   gap: 6px;
+  font-size: 0.84rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.reputation-line .stars {
+  color: #f59e0b;
+  letter-spacing: 1px;
+}
+
+.reputation-line strong {
+  color: var(--text);
+}
+
+.badges-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.rep-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.profile-rep-summary {
+  margin-top: 12px;
+  padding: 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
 }
 
 /* Empty state */

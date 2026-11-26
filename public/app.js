@@ -139,7 +139,23 @@ function renderUserNav() {
   $('#navUserName').textContent = state.currentUser.name + suffix;
   const avatar = $('#navAvatar');
   avatar.textContent = getInitials(state.currentUser.name);
-  avatar.style.background = state.currentUser.avatarColor || '#2d6a4f';
+  avatar.style.background = state.currentUser.avatarColor || '#4F46E5';
+
+  const summaryEl = $('#profileRepSummary');
+  if (summaryEl) {
+    const badges = (state.currentUser.badges || [])
+      .map(b => `<span class="rep-badge">${escapeHtml(b)}</span>`)
+      .join('');
+    summaryEl.innerHTML = `
+      <div class="reputation-line">
+        <span class="stars">★★★★★</span>
+        <strong>${(state.currentUser.rating ?? 5).toFixed(1)}</strong>
+        <span class="rep-sep">·</span>
+        <span>${state.currentUser.completedTrades || 0} trueques completados</span>
+      </div>
+      ${badges ? `<div class="badges-row">${badges}</div>` : ''}
+    `;
+  }
 }
 
 function renderUserSwitcher() {
@@ -194,6 +210,7 @@ function renderItems() {
               <span class="owner-chip">
                 <span class="avatar" style="width:22px;height:22px;font-size:0.7rem;background:${escapeHtml(item.ownerAvatarColor)}">${getInitials(item.ownerName)}</span>
                 ${escapeHtml(item.ownerName)}
+                <span class="mini-rating" title="${item.ownerCompletedTrades || 0} trueques completados">★ ${(item.ownerRating ?? 5).toFixed(1)}</span>
               </span>
               <span>📍 ${escapeHtml(item.location)}</span>
             </div>
@@ -273,6 +290,10 @@ async function openItemDetail(itemId) {
     `;
   }
 
+  const badgesHtml = (item.ownerBadges || [])
+    .map(b => `<span class="rep-badge">${escapeHtml(b)}</span>`)
+    .join('');
+
   $('#detailContent').innerHTML = `
     <div>${mediaHtml}</div>
     <div class="detail-info">
@@ -287,7 +308,16 @@ async function openItemDetail(itemId) {
       <p class="detail-desc">${escapeHtml(item.description)}</p>
       <div class="owner-chip">
         <span class="avatar" style="background:${escapeHtml(item.ownerAvatarColor)}">${getInitials(item.ownerName)}</span>
-        <span>Publicado por <strong>${escapeHtml(item.ownerName)}</strong></span>
+        <div>
+          <div>Publicado por <strong>${escapeHtml(item.ownerName)}</strong></div>
+          <div class="reputation-line">
+            <span class="stars">★★★★★</span>
+            <strong>${(item.ownerRating ?? 5).toFixed(1)}</strong>
+            <span class="rep-sep">·</span>
+            <span>${item.ownerCompletedTrades || 0} trueques completados</span>
+          </div>
+          ${badgesHtml ? `<div class="badges-row">${badgesHtml}</div>` : ''}
+        </div>
       </div>
       ${actionHtml}
     </div>
