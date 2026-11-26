@@ -1472,6 +1472,27 @@ function initAccessibility() {
   });
 }
 
+function initDarkMode() {
+  const btn = $('#btnDarkMode');
+  const saved = localStorage.getItem('truecalo_dark_mode');
+  let isDark = saved !== null
+    ? saved === '1'
+    : window.matchMedia?.('(prefers-color-scheme: dark)').matches;
+
+  function apply() {
+    document.documentElement.classList.toggle('dark', isDark);
+    if (btn) btn.textContent = isDark ? '☀️' : '🌙';
+  }
+
+  apply();
+  btn?.addEventListener('click', () => {
+    isDark = !isDark;
+    localStorage.setItem('truecalo_dark_mode', isDark ? '1' : '0');
+    apply();
+  });
+}
+
 init();
 initCookieConsent();
 initAccessibility();
+initDarkMode();

@@ -18,6 +18,50 @@
   --radius: 14px;
 }
 
+html.dark {
+  --bg: #0f172a;
+  --surface: #1e293b;
+  --surface-alt: #334155;
+  --text: #f8fafc;
+  --muted: #94a3b8;
+  --border: #334155;
+  --primary: #6366f1;
+  --primary-hover: #818cf8;
+  --primary-soft: rgba(99, 102, 241, 0.2);
+  --shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+}
+
+html.dark .navbar {
+  background: rgba(15, 23, 42, 0.92);
+}
+
+html.dark .brand-title {
+  color: #f8fafc;
+}
+
+html.dark .card-looking-box {
+  background: #0f172a;
+}
+
+html.dark .trust-pill {
+  background: #334155;
+  color: #f8fafc;
+}
+
+html.dark .condition-pill {
+  background: rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
+}
+
+html.dark .match-track {
+  background: #334155;
+}
+
+html.dark .match-banner strong,
+html.dark .match-top {
+  color: #34d399;
+}
+
 * {
   box-sizing: border-box;
 }
