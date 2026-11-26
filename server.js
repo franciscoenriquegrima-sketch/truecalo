@@ -1,4 +1,5 @@
 const express = require('express');
+const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const { readDb, writeDb, generateId } = require('./db');
@@ -6,8 +7,48 @@ const { readDb, writeDb, generateId } = require('./db');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.disable('x-powered-by');
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
+
 app.use(express.json({ limit: '5mb' }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), { index: false }));
+
+function sanitizeUser(user) {
+  if (!user) return null;
+  return {
+    id: user.id,
+    name: user.name,
+    city: user.city,
+    bio: user.bio,
+    avatarColor: user.avatarColor,
+    lifetimeMember: Boolean(user.lifetimeMember),
+    createdAt: user.createdAt
+  };
+}
+
+function hashPassword(password) {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.scryptSync(password, salt, 64).toString('hex');
+  return `${salt}:${hash}`;
+}
+
+function verifyPassword(password, stored) {
+  if (!stored || !stored.includes(':')) return false;
+  const [salt, key] = stored.split(':');
+  const hashBuf = crypto.scryptSync(password, salt, 64);
+  const keyBuf = Buffer.from(key, 'hex');
+  return hashBuf.length === keyBuf.length && crypto.timingSafeEqual(hashBuf, keyBuf);
+}
+
+function isSafeImageUrl(url) {
+  if (!url) return true;
+  return /^https?:\/\//i.test(url) || /^data:image\/(png|jpeg|jpg|webp|gif|svg\+xml);base64,/i.test(url);
+}
 
 function escapeXml(str = '') {
   return String(str)
@@ -75,18 +116,30 @@ app.get('/sitemap.xml', (req, res) => {
   });
 });
 
+// Home route with dynamic base URL for SEO tags
+app.get('/', (req, res) => {
+  const indexPath = path.join(__dirname, 'public', 'index.html');
+  const baseUrl = getBaseUrl(req);
+  const html = fs
+    .readFileSync(indexPath, 'utf8')
+    .replaceAll('http://localhost:3000', baseUrl);
+  res.send(html);
+});
+
 // SEO: dynamic meta + JSON-LD for individual item URLs (/objeto/:id)
 app.get('/objeto/:id', (req, res) => {
   const db = readDb();
   const item = db.items.find(i => i.id === req.params.id);
   const indexPath = path.join(__dirname, 'public', 'index.html');
-  let html = fs.readFileSync(indexPath, 'utf8');
+  const baseUrl = getBaseUrl(req);
+  let html = fs
+    .readFileSync(indexPath, 'utf8')
+    .replaceAll('http://localhost:3000', baseUrl);
 
   if (!item) {
     return res.status(404).send(html);
   }
 
-  const baseUrl = getBaseUrl(req);
   const itemUrl = `${baseUrl}/objeto/${encodeURIComponent(item.id)}`;
   const title = `${item.title} — ${item.type === 'regalo' ? 'Regalo' : 'Trueque'} en truecalo`;
   const desc = `${item.description.slice(0, 145)}${item.description.length > 145 ? '...' : ''}`;
@@ -169,7 +222,7 @@ app.get('/api/stats', (req, res) => {
 // Users
 app.get('/api/users', (req, res) => {
   const db = readDb();
-  res.json(db.users);
+  res.json(db.users.map(sanitizeUser));
 });
 
 app.post('/api/register', (req, res) => {
@@ -189,6 +242,7 @@ app.post('/api/register', (req, res) => {
     id: generateId('usr_'),
     name: cleanName,
     email: normalizedEmail,
+    passwordHash: hashPassword(password),
     city: (city || 'Sin ubicación').trim(),
     bio: (bio || 'Miembro de por vida en TRUECALO.').trim(),
     avatarColor: pickColor(cleanName),
@@ -202,7 +256,21 @@ app.post('/api/register', (req, res) => {
 
   db.users.push(user);
   writeDb(db);
-  res.status(201).json(user);
+  res.status(201).json(sanitizeUser(user));
+});
+
+app.post('/api/login', (req, res) => {
+  const { email, password } = req.body || {};
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Introduce correo y contraseña.' });
+  }
+  const db = readDb();
+  const normalizedEmail = email.trim().toLowerCase();
+  const user = db.users.find(u => (u.email || '').toLowerCase() === normalizedEmail);
+  if (!user || !verifyPassword(password, user.passwordHash)) {
+    return res.status(401).json({ error: 'Correo o contraseña incorrectos.' });
+  }
+  res.json(sanitizeUser(user));
 });
 
 app.post('/api/users', (req, res) => {
@@ -222,7 +290,7 @@ app.post('/api/users', (req, res) => {
   };
   db.users.push(user);
   writeDb(db);
-  res.status(201).json(user);
+  res.status(201).json(sanitizeUser(user));
 });
 
 app.put('/api/users/:id', (req, res) => {
@@ -236,7 +304,7 @@ app.put('/api/users/:id', (req, res) => {
   if (typeof bio === 'string') user.bio = bio.trim();
 
   writeDb(db);
-  res.json(user);
+  res.json(sanitizeUser(user));
 });
 
 // Items
@@ -283,6 +351,10 @@ app.post('/api/items', (req, res) => {
   const { ownerId, title, description, category, condition, type, lookingFor, location, imageUrl } = req.body || {};
   if (!ownerId || !title || !title.trim() || !description || !description.trim()) {
     return res.status(400).json({ error: 'Faltan campos obligatorios (título, descripción y usuario).' });
+  }
+  const cleanImg = (imageUrl || '').trim();
+  if (!isSafeImageUrl(cleanImg)) {
+    return res.status(400).json({ error: 'La URL de la imagen no es válida.' });
   }
 
   const db = readDb();
@@ -334,7 +406,13 @@ app.put('/api/items/:id', (req, res) => {
   if (type === 'trueque' || type === 'regalo') item.type = type;
   if (typeof lookingFor === 'string') item.lookingFor = lookingFor.trim();
   if (typeof location === 'string') item.location = location.trim();
-  if (typeof imageUrl === 'string') item.imageUrl = imageUrl.trim();
+  if (typeof imageUrl === 'string') {
+    const cleanImg = imageUrl.trim();
+    if (!isSafeImageUrl(cleanImg)) {
+      return res.status(400).json({ error: 'La URL de la imagen no es válida.' });
+    }
+    item.imageUrl = cleanImg;
+  }
   if (status === 'disponible' || status === 'intercambiado') item.status = status;
 
   writeDb(db);

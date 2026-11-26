@@ -135,7 +135,8 @@ async function loadTrades() {
 // Rendering
 function renderUserNav() {
   if (!state.currentUser) return;
-  $('#navUserName').textContent = state.currentUser.name;
+  const suffix = state.currentUser.lifetimeMember ? ' ★' : '';
+  $('#navUserName').textContent = state.currentUser.name + suffix;
   const avatar = $('#navAvatar');
   avatar.textContent = getInitials(state.currentUser.name);
   avatar.style.background = state.currentUser.avatarColor || '#2d6a4f';
@@ -168,7 +169,7 @@ function renderItems() {
       const typeLabel = item.type === 'regalo' ? 'Regalo' : 'Trueque';
       const typeClass = item.type === 'regalo' ? 'tag-regalo' : 'tag-trueque';
       const media = item.imageUrl
-        ? `<img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.title)}" loading="lazy" />`
+        ? `<img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.title)}" loading="lazy" onerror="this.outerHTML='<div class=\\'card-placeholder\\'>📦</div>'" />`
         : `<div class="card-placeholder">📦</div>`;
 
       return `
@@ -484,8 +485,24 @@ function bindEvents() {
   });
   $$('.modal-backdrop').forEach(backdrop => {
     backdrop.addEventListener('click', e => {
-      if (e.target === backdrop) backdrop.classList.add('hidden');
+      if (e.target === backdrop) closeModal(backdrop.id);
     });
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      $$('.modal-backdrop:not(.hidden)').forEach(m => closeModal(m.id));
+    }
+  });
+
+  window.addEventListener('popstate', () => {
+    const match = window.location.pathname.match(/^\/objeto\/([^/]+)$/);
+    if (match) {
+      openItemDetail(decodeURIComponent(match[1]));
+    } else {
+      $('#detailModal').classList.add('hidden');
+      document.title = 'truecalo — Plataforma de trueque y segunda vida entre vecinos';
+    }
   });
 
   // Search & filters
