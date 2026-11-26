@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>truecalo — Plataforma de trueque y segunda vida entre vecinos</title>
+  <meta name="description" content="Intercambia, regala y da una segunda vida a las cosas que ya no usas. truecalo es tu comunidad local de trueque sostenible sin dinero." />
+  <meta name="keywords" content="trueque, intercambio de objetos, segunda vida, economía circular, regalar cosas, consumo responsable, truecalo" />
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#2d6a4f" />
+  <meta name="google-adsense-account" content="ca-pub-0000000000000000" />
+  <link rel="canonical" href="http://localhost:3000/" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="TRUECALO" />
+  <meta property="og:locale" content="es_ES" />
+  <meta property="og:title" content="TRUECALO — Si te interesa, cámbialo" />
+  <meta property="og:description" content="Publica lo que ya no necesitas, propón trueques justos o regálalo a alguien de tu comunidad." />
+  <meta property="og:url" content="http://localhost:3000/" />
+  <meta property="og:image" content="http://localhost:3000/logo.svg" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="truecalo — Plataforma de trueque y segunda vida" />
+  <meta name="twitter:description" content="Intercambia y regala objetos que ya no usas sin gastar dinero." />
+
+  <!-- Structured Data (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "truecalo",
+    "url": "http://localhost:3000/",
+    "description": "Plataforma comunitaria de trueque y segunda vida para intercambiar o regalar objetos que ya no usas.",
+    "inLanguage": "es",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "http://localhost:3000/?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="navbar">
+    <div class="container nav-inner">
+      <a href="/" class="brand" id="brandHome" aria-label="TRUECALO — Si te interesa, cámbialo">
+        <svg class="brand-logo" viewBox="0 0 500 180" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <linearGradient id="truecaloGradientNav" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#00D68F"/>
+              <stop offset="50%" stop-color="#00B8FF"/>
+              <stop offset="100%" stop-color="#4F46E5"/>
+            </linearGradient>
+          </defs>
+          <path d="M80 60 L40 90 L80 120" fill="none" stroke="url(#truecaloGradientNav)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M120 120 L160 90 L120 60" fill="none" stroke="url(#truecaloGradientNav)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M40 90 H140" fill="none" stroke="url(#truecaloGradientNav)" stroke-width="14" stroke-linecap="round"/>
+          <path d="M160 90 H60" fill="none" stroke="url(#truecaloGradientNav)" stroke-width="14" stroke-linecap="round" opacity="0.35"/>
+          <text x="190" y="105" font-size="52" font-family="Plus Jakarta Sans, Arial, sans-serif" font-weight="800" fill="#111827">
+            TRUE<tspan fill="url(#truecaloGradientNav)">CALO</tspan>
+          </text>
+          <text x="192" y="135" font-size="16" font-family="Plus Jakarta Sans, Arial, sans-serif" fill="#6B7280">
+            Si te interesa, cámbialo
+          </text>
+        </svg>
+      </a>
+
+      <div class="search-bar">
+        <span class="search-icon" aria-hidden="true">🔍</span>
+        <input type="search" id="searchInput" placeholder="Buscar objetos, ciudades o qué necesitas..." aria-label="Buscar objetos" />
+      </div>
+
+      <div class="nav-actions">
+        <a href="/registro" class="btn btn-outline">Hazte miembro · 20 €</a>
+        <button class="btn btn-primary" id="btnOpenPublish">+ Publicar objeto</button>
+        <button class="btn btn-outline" id="btnOpenTrades">
+          Mis trueques <span class="badge hidden" id="tradesBadge">0</span>
+        </button>
+        <button class="user-pill" id="btnOpenProfile" title="Cambiar o editar perfil">
+          <span class="avatar" id="navAvatar">?</span>
+          <span class="user-name" id="navUserName">Usuario</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-inner">
+        <div class="hero-copy">
+          <span class="hero-tag">Economía circular entre vecinos</span>
+          <h1>Lo que ya no usas puede ser el tesoro de alguien más.</h1>
+          <p>Publica objetos que tengas guardados, propón trueques justos o regálalos para darles una segunda vida sin gastar dinero.</p>
+          <div class="hero-cta">
+            <button class="btn btn-primary btn-lg" id="btnHeroPublish">Publicar mi primer objeto</button>
+            <a href="#catalogo" class="btn btn-ghost btn-lg">Explorar objetos ↓</a>
+          </div>
+        </div>
+        <div class="stats-card" aria-label="Impacto de la comunidad">
+          <div class="stat">
+            <strong id="statAvailable">0</strong>
+            <span>Objetos disponibles</span>
+          </div>
+          <div class="stat">
+            <strong id="statSecondLife">0</strong>
+            <span>Segundas vidas dadas</span>
+          </div>
+          <div class="stat">
+            <strong id="statGifts">0</strong>
+            <span>Regalos solidarios</span>
+          </div>
+          <div class="stat">
+            <strong id="statUsers">0</strong>
+            <span>Personas truecando</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="catalog-section" id="catalogo">
+      <div class="container">
+        <div class="filters-bar">
+          <div class="category-pills" id="categoryPills">
+            <button class="pill active" data-category="Todas">Todas</button>
+            <button class="pill" data-category="Hogar">Hogar</button>
+            <button class="pill" data-category="Tecnología">Tecnología</button>
+            <button class="pill" data-category="Ropa y Accesorios">Ropa y Accesorios</button>
+            <button class="pill" data-category="Libros y Cultura">Libros y Cultura</button>
+            <button class="pill" data-category="Deporte y Ocio">Deporte y Ocio</button>
+            <button class="pill" data-category="Herramientas">Herramientas</button>
+            <button class="pill" data-category="Otros">Otros</button>
+          </div>
+
+          <div class="secondary-filters">
+            <select id="typeFilter" aria-label="Filtrar por tipo">
+              <option value="todos">Trueques y regalos</option>
+              <option value="trueque">Solo trueques</option>
+              <option value="regalo">Solo regalos (Gratis)</option>
+            </select>
+            <select id="statusFilter" aria-label="Filtrar por disponibilidad">
+              <option value="disponible">Disponibles</option>
+              <option value="todos">Todos (incl. intercambiados)</option>
+              <option value="intercambiado">Ya intercambiados</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="items-grid" id="itemsGrid"></div>
+        <div class="empty-state hidden" id="emptyState">
+          <p class="empty-emoji">🌱</p>
+          <h3>No encontramos objetos con esos filtros</h3>
+          <p>Prueba otra búsqueda o sé la primera persona en publicar algo en esta categoría.</p>
+          <button class="btn btn-primary" id="btnEmptyReset">Ver todos los objetos</button>
+        </div>
+
+        <!-- Espacio publicitario preparado para Google AdSense -->
+        <aside class="ad-slot" id="adSlotBanner" aria-label="Publicidad">
+          <span class="ad-label">Publicidad</span>
+          <div class="ad-placeholder" id="adPlaceholder">
+            Espacio reservado para Google AdSense (configura tu <code>ca-pub-XXXXXXXXXXXXXXXX</code> en <code>public/index.html</code>, <code>public/app.js</code> y <code>public/ads.txt</code>)
+          </div>
+          <ins class="adsbygoogle hidden"
+               id="adsenseUnit"
+               style="display:block"
+               data-ad-client="ca-pub-0000000000000000"
+               data-ad-slot="0000000000"
+               data-ad-format="auto"
+               data-full-width-responsive="true"></ins>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <p><strong>TRUECALO</strong> · Si te interesa, cámbialo.</p>
+      <nav class="footer-links" aria-label="Enlaces legales">
+        <a href="/privacidad">Privacidad</a>
+        <a href="/cookies">Cookies</a>
+        <a href="/terminos">Términos</a>
+        <a href="/contacto">Contacto</a>
+        <button type="button" class="footer-link-btn" id="btnManageCookies">Configurar cookies</button>
+      </nav>
+    </div>
+  </footer>
+
+  <!-- Modal: Detalle de objeto y propuesta de trueque -->
+  <div class="modal-backdrop hidden" id="detailModal" role="dialog" aria-modal="true">
+    <div class="modal modal-lg">
+      <button class="modal-close" data-close="detailModal" aria-label="Cerrar">✕</button>
+      <div class="detail-layout" id="detailContent"></div>
+    </div>
+  </div>
+
+  <!-- Modal: Publicar o editar objeto -->
+  <div class="modal-backdrop hidden" id="publishModal" role="dialog" aria-modal="true">
+    <div class="modal">
+      <button class="modal-close" data-close="publishModal" aria-label="Cerrar">✕</button>
+      <h2 id="publishModalTitle">Publicar un objeto</h2>
+      <p class="modal-subtitle">Cuéntanos qué tienes y qué te gustaría recibir a cambio (o si prefieres regalarlo).</p>
+
+      <form id="publishForm" class="form-stack">
+        <input type="hidden" id="editItemId" />
+        <label>
+          <span>Título del objeto *</span>
+          <input type="text" id="itemTitle" required maxlength="80" placeholder="Ej. Cafetera italiana, mochila 40L..." />
+        </label>
+
+        <div class="form-row">
+          <label>
+            <span>Categoría</span>
+            <select id="itemCategory">
+              <option value="Hogar">Hogar</option>
+              <option value="Tecnología">Tecnología</option>
+              <option value="Ropa y Accesorios">Ropa y Accesorios</option>
+              <option value="Libros y Cultura">Libros y Cultura</option>
+              <option value="Deporte y Ocio">Deporte y Ocio</option>
+              <option value="Herramientas">Herramientas</option>
+              <option value="Otros">Otros</option>
+            </select>
+          </label>
+          <label>
+            <span>Estado</span>
+            <select id="itemCondition">
+              <option value="Como nuevo">Como nuevo</option>
+              <option value="Buen estado">Buen estado</option>
+              <option value="Usado con cariño">Usado con cariño</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="form-row">
+          <label>
+            <span>Modalidad</span>
+            <select id="itemType">
+              <option value="trueque">Trueque (busco algo a cambio)</option>
+              <option value="regalo">Regalo (segunda vida gratis)</option>
+            </select>
+          </label>
+          <label>
+            <span>Ciudad / Barrio *</span>
+            <input type="text" id="itemLocation" required placeholder="Ej. Madrid · Centro" />
+          </label>
+        </div>
+
+        <label id="lookingForGroup">
+          <span>¿Qué buscas a cambio?</span>
+          <input type="text" id="itemLookingFor" placeholder="Ej. Plantas, libros de ciencia ficción o abierto a ideas" />
+        </label>
+
+        <label>
+          <span>Descripción *</span>
+          <textarea id="itemDescription" rows="3" required placeholder="Describe detalles útiles: medidas, uso, si incluye accesorios..."></textarea>
+        </label>
+
+        <div class="image-input-group">
+          <label>
+            <span>Foto del objeto (URL o subir archivo)</span>
+            <input type="url" id="itemImageUrl" placeholder="https://... (opcional)" />
+          </label>
+          <div class="upload-row">
+            <label class="btn btn-outline btn-sm upload-btn">
+              📷 Subir foto desde mi equipo
+              <input type="file" id="itemImageFile" accept="image/*" hidden />
+            </label>
+            <span class="file-hint" id="imageFileHint">Sin archivo seleccionado</span>
+          </div>
+          <img id="imagePreview" class="image-preview hidden" alt="Vista previa" />
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-ghost" data-close="publishModal">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmitPublish">Publicar objeto</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Mis trueques y mis objetos -->
+  <div class="modal-backdrop hidden" id="tradesModal" role="dialog" aria-modal="true">
+    <div class="modal modal-lg">
+      <button class="modal-close" data-close="tradesModal" aria-label="Cerrar">✕</button>
+      <h2>Mi espacio en truecalo</h2>
+      <div class="tabs">
+        <button class="tab active" data-tab="received">Propuestas recibidas</button>
+        <button class="tab" data-tab="sent">Propuestas enviadas</button>
+        <button class="tab" data-tab="myitems">Mis objetos</button>
+      </div>
+      <div id="tradesContent" class="trades-content"></div>
+    </div>
+  </div>
+
+  <!-- Modal: Perfil / Cambiar de usuario -->
+  <div class="modal-backdrop hidden" id="profileModal" role="dialog" aria-modal="true">
+    <div class="modal">
+      <button class="modal-close" data-close="profileModal" aria-label="Cerrar">✕</button>
+      <h2>Tu perfil en truecalo</h2>
+      <p class="modal-subtitle">Cambia entre perfiles existentes para probar trueques o crea tu propio perfil.</p>
+
+      <div class="profile-switch">
+        <label>
+          <span>Usuario activo</span>
+          <select id="userSwitcher"></select>
+        </label>
+      </div>
+
+      <hr class="divider" />
+
+      <h3>Crear nuevo perfil</h3>
+      <form id="newUserForm" class="form-stack">
+        <label>
+          <span>Nombre *</span>
+          <input type="text" id="newUserName" required placeholder="Tu nombre o apodo" />
+        </label>
+        <label>
+          <span>Ciudad / Barrio</span>
+          <input type="text" id="newUserCity" placeholder="Ej. Sevilla · Triana" />
+        </label>
+        <label>
+          <span>Bio breve</span>
+          <input type="text" id="newUserBio" placeholder="Qué te gusta intercambiar..." />
+        </label>
+        <button type="submit" class="btn btn-primary">Crear y usar este perfil</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Banner de consentimiento de cookies (RGPD / AdSense) -->
+  <div class="cookie-banner hidden" id="cookieBanner" role="region" aria-label="Aviso de cookies">
+    <div class="cookie-banner-text">
+      <strong>🍪 Tu privacidad en TRUECALO</strong>
+      <p>Usamos cookies técnicas necesarias para que la web funcione y cookies publicitarias (Google AdSense) si nos das tu permiso. Consulta nuestra <a href="/cookies">Política de Cookies</a>.</p>
+    </div>
+    <div class="cookie-banner-actions">
+      <button type="button" class="btn btn-ghost btn-sm" id="btnCookieConfig">Configurar</button>
+      <button type="button" class="btn btn-outline btn-sm" id="btnCookieReject">Solo necesarias</button>
+      <button type="button" class="btn btn-primary btn-sm" id="btnCookieAccept">Aceptar todas</button>
+    </div>
+  </div>
+
+  <!-- Modal: Preferencias de cookies -->
+  <div class="modal-backdrop hidden" id="cookieModal" role="dialog" aria-modal="true">
+    <div class="modal">
+      <button class="modal-close" data-close="cookieModal" aria-label="Cerrar">✕</button>
+      <h2>Preferencias de cookies</h2>
+      <p class="modal-subtitle">Elige qué cookies permites en TRUECALO. Puedes cambiar esta decisión cuando quieras.</p>
+      <div class="form-stack">
+        <div class="cookie-option">
+          <div>
+            <strong>Cookies técnicas necesarias</strong>
+            <p class="cookie-opt-desc">Imprescindibles para recordar tu perfil activo y tu preferencia de cookies.</p>
+          </div>
+          <span class="tag tag-trueque">Siempre activas</span>
+        </div>
+        <label class="cookie-option cookie-toggle-row">
+          <div>
+            <strong>Cookies de publicidad (Google AdSense)</strong>
+            <p class="cookie-opt-desc">Permiten mostrar anuncios personalizados y medir su rendimiento para mantener la plataforma gratuita.</p>
+          </div>
+          <input type="checkbox" id="consentAdsToggle" />
+        </label>
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline" id="btnSaveCookiePrefs">Guardar preferencias</button>
+          <button type="button" class="btn btn-primary" id="btnAcceptAllModal">Aceptar todas</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

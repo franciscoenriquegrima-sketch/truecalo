@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro de por vida (20 € pago único) — TRUECALO</title>
+  <meta name="description" content="Únete a TRUECALO con un pago único de 20 € para toda la vida. Publica objetos, trueca sin comisiones y da una segunda vida a tus cosas." />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="navbar">
+    <div class="container nav-inner">
+      <a href="/" class="brand" aria-label="Volver a TRUECALO">
+        <img src="/logo.svg" alt="TRUECALO" class="brand-logo" />
+      </a>
+      <a href="/" class="btn btn-outline">← Volver al catálogo</a>
+    </div>
+  </header>
+
+  <main class="container register-page">
+    <section class="register-grid">
+      <div class="plan-card">
+        <span class="hero-tag">Membresía Fundador · Sin suscripciones</span>
+        <h1>Acceso para toda la vida</h1>
+        <div class="plan-price">
+          <span class="price-amount">20 €</span>
+          <span class="price-note">Pago único · Para siempre</span>
+        </div>
+        <p class="plan-desc">Olvídate de cuotas mensuales o comisiones por intercambio. Paga una sola vez y disfruta de TRUECALO sin límites.</p>
+
+        <ul class="plan-benefits">
+          <li>✓ Publicaciones ilimitadas de trueques y regalos</li>
+          <li>✓ Propuestas y chat directo con otros vecinos</li>
+          <li>✓ 0% comisiones en todos tus intercambios</li>
+          <li>✓ Insignia verificada de <strong>Miembro de por vida</strong></li>
+          <li>✓ Acceso a todas las futuras mejoras de la plataforma</li>
+        </ul>
+
+        <div class="plan-guarantee">
+          🔒 Entorno de registro conectado a tu comunidad local. Puedes conectar tu pasarela de pago (Stripe / Bizum / PayPal) cuando pases a producción.
+        </div>
+      </div>
+
+      <div class="register-form-card">
+        <h2>Crea tu cuenta</h2>
+        <p class="modal-subtitle">Completa tus datos para activar tu acceso vitalicio por 20 €.</p>
+
+        <form id="registerForm" class="form-stack">
+          <label>
+            <span>Nombre o apodo *</span>
+            <input type="text" id="regName" required maxlength="60" placeholder="Ej. Marta López" />
+          </label>
+
+          <label>
+            <span>Correo electrónico *</span>
+            <input type="email" id="regEmail" required placeholder="tu@correo.com" />
+          </label>
+
+          <div class="form-row">
+            <label>
+              <span>Ciudad / Barrio *</span>
+              <input type="text" id="regCity" required placeholder="Ej. Madrid · Lavapiés" />
+            </label>
+            <label>
+              <span>Contraseña *</span>
+              <input type="password" id="regPassword" required minlength="6" placeholder="Mínimo 6 caracteres" />
+            </label>
+          </div>
+
+          <label>
+            <span>¿Qué te gusta intercambiar? (opcional)</span>
+            <input type="text" id="regBio" maxlength="160" placeholder="Libros, tecnología, plantas, bicis..." />
+          </label>
+
+          <div class="payment-box">
+            <span class="payment-title">Método de pago único (20,00 €)</span>
+            <div class="payment-methods">
+              <label class="pay-option">
+                <input type="radio" name="paymentMethod" value="tarjeta" checked />
+                <span>💳 Tarjeta</span>
+              </label>
+              <label class="pay-option">
+                <input type="radio" name="paymentMethod" value="bizum" />
+                <span>📱 Bizum</span>
+              </label>
+              <label class="pay-option">
+                <input type="radio" name="paymentMethod" value="paypal" />
+                <span>🅿️ PayPal</span>
+              </label>
+            </div>
+          </div>
+
+          <label class="terms-check">
+            <input type="checkbox" id="regTerms" required />
+            <span>Acepto los <a href="/terminos" target="_blank">Términos de uso</a> y la <a href="/privacidad" target="_blank">Política de Privacidad</a>.</span>
+          </label>
+
+          <button type="submit" class="btn btn-primary btn-lg" id="btnRegisterSubmit">
+            Pagar 20 € y activar cuenta de por vida
+          </button>
+          <p class="form-error hidden" id="regError"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <p><strong>TRUECALO</strong> · Si te interesa, cámbialo.</p>
+      <nav class="footer-links" aria-label="Enlaces legales">
+        <a href="/privacidad">Privacidad</a>
+        <a href="/cookies">Cookies</a>
+        <a href="/terminos">Términos</a>
+        <a href="/contacto">Contacto</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+    const form = document.getElementById('registerForm');
+    const errorEl = document.getElementById('regError');
+    const submitBtn = document.getElementById('btnRegisterSubmit');
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      errorEl.classList.add('hidden');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Activando tu cuenta...';
+
+      const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'tarjeta';
+
+      try {
+        const res = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: document.getElementById('regName').value,
+            email: document.getElementById('regEmail').value,
+            city: document.getElementById('regCity').value,
+            password: document.getElementById('regPassword').value,
+            bio: document.getElementById('regBio').value,
+            paymentMethod
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'No se pudo completar el registro.');
+
+        localStorage.setItem('truecalo_user_id', data.id);
+        window.location.href = '/?welcome=1';
+      } catch (err) {
+        errorEl.textContent = err.message;
+        errorEl.classList.remove('hidden');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Pagar 20 € y activar cuenta de por vida';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+<svg width="500" height="180" viewBox="0 0 500 180" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="truecaloGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00D68F"/>
+      <stop offset="50%" stop-color="#00B8FF"/>
+      <stop offset="100%" stop-color="#4F46E5"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Flecha izquierda -->
+  <path d="M80 60 L40 90 L80 120" fill="none" stroke="url(#truecaloGradient)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Flecha derecha -->
+  <path d="M120 120 L160 90 L120 60" fill="none" stroke="url(#truecaloGradient)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Líneas de unión -->
+  <path d="M40 90 H140" fill="none" stroke="url(#truecaloGradient)" stroke-width="14" stroke-linecap="round"/>
+  <path d="M160 90 H60" fill="none" stroke="url(#truecaloGradient)" stroke-width="14" stroke-linecap="round" opacity="0.35"/>
+
+  <!-- Texto -->
+  <text x="190" y="105" font-size="52" font-family="Poppins, Plus Jakarta Sans, Arial, sans-serif" font-weight="700" fill="#111827">
+    TRUE<tspan fill="url(#truecaloGradient)">CALO</tspan>
+  </text>
+
+  <!-- Eslogan -->
+  <text x="192" y="135" font-size="16" font-family="Plus Jakarta Sans, Arial, sans-serif" fill="#6B7280">
+    Si te interesa, cámbialo
+  </text>
+</svg>

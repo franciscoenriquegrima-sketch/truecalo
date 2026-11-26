@@ -1,0 +1,13 @@
+{
+  "name": "truecalo",
+  "version": "1.0.0",
+  "description": "Plataforma web de trueque y segunda vida para objetos que ya no usas",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
