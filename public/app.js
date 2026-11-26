@@ -769,15 +769,30 @@ function bindEvents() {
     reader.onload = () => {
       const img = new Image();
       img.onload = () => {
-        const maxW = 960;
-        const scale = img.width > maxW ? maxW / img.width : 1;
+        const maxW = 1200;
+        const maxH = 900;
+        const scale = Math.min(1, maxW / img.width, maxH / img.height);
         const canvas = document.createElement('canvas');
         canvas.width = Math.round(img.width * scale);
         canvas.height = Math.round(img.height * scale);
         canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-        const compressed = canvas.toDataURL('image/webp', 0.82);
+
+        let compressed = '';
+        for (const q of [0.85, 0.72, 0.58, 0.45]) {
+          compressed = canvas.toDataURL('image/webp', q);
+          const approxBytes = Math.ceil((compressed.length * 3) / 4);
+          if (approxBytes <= 1024 * 1024) break;
+        }
+
+        const finalBytes = Math.ceil((compressed.length * 3) / 4);
+        if (finalBytes > 1024 * 1024) {
+          showToast('La imagen supera 1 MB incluso tras optimizarla. Elige otra más ligera.', true);
+          return;
+        }
+
+        const kb = Math.round(finalBytes / 1024);
         state.uploadedImageDataUrl = compressed;
-        $('#imageFileHint').textContent = `${file.name} (optimizada)`;
+        $('#imageFileHint').textContent = `${canvas.width}×${canvas.height} WebP (${kb} KB)`;
         $('#imagePreview').src = compressed;
         $('#imagePreview').classList.remove('hidden');
       };
