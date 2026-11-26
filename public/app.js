@@ -603,6 +603,10 @@ function bindEvents() {
     btn.textContent = state.filters.nearMe
       ? `📍 Cerca de ${city} ✕`
       : '📍 Ver objetos cerca de mí';
+    const heading = $('#catalogHeading');
+    if (heading) {
+      heading.textContent = state.filters.nearMe ? `🔥 Cerca de ${city}` : '🔥 Cerca de ti';
+    }
     loadItems();
   });
 

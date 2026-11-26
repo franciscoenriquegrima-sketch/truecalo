@@ -454,6 +454,17 @@ textarea {
   color: var(--text);
 }
 
+.catalog-heading-row {
+  margin: 4px 0 14px;
+}
+
+.catalog-heading {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
 /* Grid & Cards */
 .items-grid {
   display: grid;
