@@ -251,7 +251,7 @@ function renderItems() {
       const typeLabel = item.type === 'regalo' ? '🎁 REGALO' : '🔄 TRUEQUE';
       const typeClass = item.type === 'regalo' ? 'tag-regalo' : 'tag-trueque';
       const media = item.imageUrl
-        ? `<img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.title)}" loading="lazy" onerror="this.outerHTML='<div class=\\'card-placeholder\\'>📦</div>'" />`
+        ? `<img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.title)}" loading="lazy" decoding="async" onerror="this.outerHTML='<div class=\\'card-placeholder\\'>📦</div>'" />`
         : `<div class="card-placeholder">📦</div>`;
 
       return `
@@ -325,7 +325,7 @@ async function openItemDetail(itemId) {
   }
 
   const mediaHtml = item.imageUrl
-    ? `<img class="detail-img" src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.title)}" />`
+    ? `<img class="detail-img" src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.title)}" decoding="async" onerror="this.outerHTML='<div class=\\'detail-img card-placeholder\\'>📦</div>'" />`
     : `<div class="detail-img card-placeholder">📦</div>`;
 
   let actionHtml = '';
@@ -747,10 +747,21 @@ function bindEvents() {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = () => {
-      state.uploadedImageDataUrl = reader.result;
-      $('#imageFileHint').textContent = file.name;
-      $('#imagePreview').src = reader.result;
-      $('#imagePreview').classList.remove('hidden');
+      const img = new Image();
+      img.onload = () => {
+        const maxW = 960;
+        const scale = img.width > maxW ? maxW / img.width : 1;
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        const compressed = canvas.toDataURL('image/webp', 0.82);
+        state.uploadedImageDataUrl = compressed;
+        $('#imageFileHint').textContent = `${file.name} (optimizada)`;
+        $('#imagePreview').src = compressed;
+        $('#imagePreview').classList.remove('hidden');
+      };
+      img.src = reader.result;
     };
     reader.readAsDataURL(file);
   });

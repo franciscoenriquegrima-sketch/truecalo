@@ -503,8 +503,10 @@ textarea {
 
 .card-media {
   position: relative;
-  height: 208px;
+  width: 100%;
+  aspect-ratio: 4 / 3;
   background: var(--surface-alt);
+  border-radius: 22px 22px 0 0;
   overflow: hidden;
 }
 
