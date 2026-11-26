@@ -295,12 +295,12 @@ function renderItems() {
         ? 'fetchpriority="high" decoding="async"'
         : 'loading="lazy" decoding="async" fetchpriority="low"';
       const media = cardSrc
-        ? `${blurSrc ? `<img class="card-blur-img" src="${escapeHtml(blurSrc)}" alt="" aria-hidden="true" />` : '<div class="card-blur-overlay"></div>'}<img class="card-full-img" src="${escapeHtml(cardSrc)}" alt="${escapeHtml(item.title)}" ${priorityAttrs} onload="this.parentElement.classList.add('is-loaded')" onerror="this.parentElement.classList.add('is-loaded');this.outerHTML='<div class=\\'card-placeholder\\'>📦</div>'" />`
+        ? `${blurSrc ? `<img class="card-blur-img" src="${escapeHtml(blurSrc)}" alt="" aria-hidden="true" />` : '<div class="card-blur-overlay"></div>'}<img class="card-full-img" src="${escapeHtml(cardSrc)}" alt="Imagen de ${escapeHtml(item.title)}" ${priorityAttrs} onload="this.parentElement.classList.add('is-loaded')" onerror="this.parentElement.classList.add('is-loaded');this.outerHTML='<div class=\\'card-placeholder\\'>📦</div>'" />`
         : `<div class="card-placeholder">📦</div>`;
 
       return `
-        <article class="card" data-item-id="${item.id}">
-          <div class="card-media ${item.imageUrl ? '' : 'is-loaded'}">
+        <article class="card" data-item-id="${item.id}" aria-labelledby="item-${escapeHtml(item.id)}">
+          <div class="card-media ${cardSrc ? '' : 'is-loaded'}">
             ${media}
             <div class="card-badges">
               <span class="tag ${typeClass}">${typeLabel}</span>
@@ -308,8 +308,8 @@ function renderItems() {
             </div>
           </div>
           <div class="card-body">
-            <h3 class="card-title">${escapeHtml(item.title)}</h3>
-            <p class="card-location">📍 ${escapeHtml(item.location)}</p>
+            <h3 class="card-title" id="item-${escapeHtml(item.id)}">${escapeHtml(item.title)}</h3>
+            <p class="card-location" aria-label="Ubicación ${escapeHtml(item.location)}">📍 ${escapeHtml(item.location)}</p>
             <div class="card-condition-row">
               <span class="condition-pill">${escapeHtml(item.condition)}</span>
               <span class="category-pill-mini">${escapeHtml(item.category)}</span>
@@ -344,7 +344,7 @@ function renderItems() {
                   <span class="mini-rating" title="${item.ownerCompletedTrades || 0} trueques completados">★ ${(item.ownerRating ?? 5).toFixed(1)}</span>
                 </span>
               </span>
-              <button type="button" class="btn-card-view">Ver</button>
+              <button type="button" class="btn-card-view" aria-label="Ver detalles de ${escapeHtml(item.title)}">Ver artículo</button>
             </div>
           </div>
         </article>
