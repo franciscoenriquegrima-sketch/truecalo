@@ -330,7 +330,7 @@ app.put('/api/users/:id', (req, res) => {
 // Items
 app.get('/api/items', (req, res) => {
   const db = readDb();
-  const { q, category, type, status, ownerId } = req.query;
+  const { q, category, type, status, ownerId, location } = req.query;
 
   let items = db.items.map(item => {
     const owner = db.users.find(u => u.id === item.ownerId);
@@ -355,6 +355,10 @@ app.get('/api/items', (req, res) => {
   }
   if (ownerId) {
     items = items.filter(i => i.ownerId === ownerId);
+  }
+  if (location && location.trim()) {
+    const locTerm = location.trim().toLowerCase();
+    items = items.filter(i => (i.location || '').toLowerCase().includes(locTerm));
   }
   if (q && q.trim()) {
     const term = q.trim().toLowerCase();

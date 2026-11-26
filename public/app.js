@@ -7,7 +7,8 @@ const state = {
     q: '',
     category: 'Todas',
     type: 'todos',
-    status: 'disponible'
+    status: 'disponible',
+    nearMe: false
   },
   activeTab: 'received',
   uploadedImageDataUrl: ''
@@ -110,12 +111,23 @@ async function loadStats() {
   $('#statUsers').textContent = stats.totalUsers;
 }
 
+function getUserCityKeyword() {
+  const raw = state.currentUser?.city || '';
+  return raw.split(/[·,-]/)[0].trim();
+}
+
 async function loadItems() {
   const params = new URLSearchParams();
   if (state.filters.q) params.set('q', state.filters.q);
   if (state.filters.category !== 'Todas') params.set('category', state.filters.category);
   if (state.filters.type !== 'todos') params.set('type', state.filters.type);
   if (state.filters.status) params.set('status', state.filters.status);
+  if (state.filters.nearMe) {
+    const city = getUserCityKeyword();
+    if (city && city.toLowerCase() !== 'sin ubicación') {
+      params.set('location', city);
+    }
+  }
 
   state.items = await api(`/api/items?${params.toString()}`);
   renderItems();
@@ -564,11 +576,29 @@ function bindEvents() {
     loadItems();
   });
 
+  $('#btnNearMe').addEventListener('click', () => {
+    const city = getUserCityKeyword();
+    if (!state.filters.nearMe && (!city || city.toLowerCase() === 'sin ubicación')) {
+      showToast('Añade tu ciudad en tu perfil para ver objetos cerca de ti.', true);
+      openModal('profileModal');
+      return;
+    }
+    state.filters.nearMe = !state.filters.nearMe;
+    const btn = $('#btnNearMe');
+    btn.classList.toggle('active', state.filters.nearMe);
+    btn.textContent = state.filters.nearMe
+      ? `📍 Cerca de ${city} ✕`
+      : '📍 Ver objetos cerca de mí';
+    loadItems();
+  });
+
   $('#btnEmptyReset').addEventListener('click', () => {
-    state.filters = { q: '', category: 'Todas', type: 'todos', status: 'disponible' };
+    state.filters = { q: '', category: 'Todas', type: 'todos', status: 'disponible', nearMe: false };
     $('#searchInput').value = '';
     $('#typeFilter').value = 'todos';
     $('#statusFilter').value = 'disponible';
+    $('#btnNearMe').classList.remove('active');
+    $('#btnNearMe').textContent = '📍 Ver objetos cerca de mí';
     $$('#categoryPills .pill').forEach(p => p.classList.toggle('active', p.dataset.category === 'Todas'));
     loadItems();
   });
@@ -720,6 +750,11 @@ function bindEvents() {
       state.currentUser = found;
       localStorage.setItem('truecalo_user_id', found.id);
       renderUserNav();
+      if (state.filters.nearMe) {
+        const city = getUserCityKeyword();
+        $('#btnNearMe').textContent = `📍 Cerca de ${city} ✕`;
+        await loadItems();
+      }
       await loadTrades();
       showToast(`Ahora estás usando el perfil de ${found.name}`);
       closeModal('profileModal');
