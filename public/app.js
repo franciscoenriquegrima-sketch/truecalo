@@ -193,7 +193,7 @@ function renderItems() {
   grid.innerHTML = state.items
     .map(item => {
       const isDone = item.status === 'intercambiado';
-      const typeLabel = item.type === 'regalo' ? 'Regalo' : 'Trueque';
+      const typeLabel = item.type === 'regalo' ? '🎁 REGALO' : '🔄 TRUEQUE';
       const typeClass = item.type === 'regalo' ? 'tag-regalo' : 'tag-trueque';
       const media = item.imageUrl
         ? `<img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.title)}" loading="lazy" onerror="this.outerHTML='<div class=\\'card-placeholder\\'>📦</div>'" />`
@@ -209,21 +209,27 @@ function renderItems() {
             </div>
           </div>
           <div class="card-body">
-            <div class="card-meta">
-              <span>${escapeHtml(item.category)}</span>
-              <span>${escapeHtml(item.condition)}</span>
-            </div>
             <h3 class="card-title">${escapeHtml(item.title)}</h3>
-            <p class="card-looking">
-              ${item.type === 'regalo' ? '🎁 Gratis para quien lo necesite' : `🔄 Busca: ${escapeHtml(item.lookingFor)}`}
-            </p>
+            <p class="card-location">📍 ${escapeHtml(item.location)}</p>
+            <div class="card-condition-row">
+              <span class="condition-pill">${escapeHtml(item.condition)}</span>
+              <span class="category-pill-mini">${escapeHtml(item.category)}</span>
+            </div>
+            <div class="card-looking-box">
+              <span class="looking-label">${item.type === 'regalo' ? 'Modalidad' : 'Busca'}</span>
+              <p class="card-looking-val">
+                ${item.type === 'regalo' ? '🎁 Gratis para quien lo necesite' : escapeHtml(item.lookingFor)}
+              </p>
+            </div>
             <div class="card-footer">
               <span class="owner-chip">
-                <span class="avatar" style="width:22px;height:22px;font-size:0.7rem;background:${escapeHtml(item.ownerAvatarColor)}">${getInitials(item.ownerName)}</span>
-                ${escapeHtml(item.ownerName)}
-                <span class="mini-rating" title="${item.ownerCompletedTrades || 0} trueques completados">★ ${(item.ownerRating ?? 5).toFixed(1)}</span>
+                <span class="avatar" style="width:32px;height:32px;font-size:0.78rem;background:${escapeHtml(item.ownerAvatarColor)}">${getInitials(item.ownerName)}</span>
+                <span>
+                  <span class="owner-name-text">${escapeHtml(item.ownerName)}</span>
+                  <span class="mini-rating" title="${item.ownerCompletedTrades || 0} trueques completados">★ ${(item.ownerRating ?? 5).toFixed(1)}</span>
+                </span>
               </span>
-              <span>📍 ${escapeHtml(item.location)}</span>
+              <button type="button" class="btn-card-view">Ver</button>
             </div>
           </div>
         </article>
