@@ -164,6 +164,7 @@ function getUserCityKeyword() {
 }
 
 async function loadItems() {
+  renderSkeletons();
   const params = new URLSearchParams();
   if (state.filters.q) params.set('q', state.filters.q);
   if (state.filters.category !== 'Todas') params.set('category', state.filters.category);
@@ -234,6 +235,25 @@ function renderUserSwitcher() {
     .join('');
 }
 
+function renderSkeletons(count = 6) {
+  const grid = $('#itemsGrid');
+  $('#emptyState').classList.add('hidden');
+  grid.innerHTML = Array.from({ length: count })
+    .map(
+      () => `
+      <div class="card card-skeleton" aria-hidden="true">
+        <div class="skeleton-media skeleton-pulse"></div>
+        <div class="card-body">
+          <div class="skeleton-line skeleton-pulse" style="width:72%;height:18px"></div>
+          <div class="skeleton-line skeleton-pulse" style="width:48%;height:14px"></div>
+          <div class="skeleton-line skeleton-pulse" style="width:100%;height:52px;margin-top:6px"></div>
+        </div>
+      </div>
+    `
+    )
+    .join('');
+}
+
 function renderItems() {
   const grid = $('#itemsGrid');
   const empty = $('#emptyState');
@@ -251,12 +271,12 @@ function renderItems() {
       const typeLabel = item.type === 'regalo' ? '🎁 REGALO' : '🔄 TRUEQUE';
       const typeClass = item.type === 'regalo' ? 'tag-regalo' : 'tag-trueque';
       const media = item.imageUrl
-        ? `<img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.title)}" loading="lazy" decoding="async" onerror="this.outerHTML='<div class=\\'card-placeholder\\'>📦</div>'" />`
+        ? `<img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.title)}" loading="lazy" decoding="async" onload="this.parentElement.classList.remove('is-loading')" onerror="this.parentElement.classList.remove('is-loading');this.outerHTML='<div class=\\'card-placeholder\\'>📦</div>'" />`
         : `<div class="card-placeholder">📦</div>`;
 
       return `
         <article class="card" data-item-id="${item.id}">
-          <div class="card-media">
+          <div class="card-media ${item.imageUrl ? 'is-loading' : ''}">
             ${media}
             <div class="card-badges">
               <span class="tag ${typeClass}">${typeLabel}</span>

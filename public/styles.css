@@ -510,6 +510,26 @@ textarea {
   overflow: hidden;
 }
 
+.card-media.is-loading,
+.skeleton-pulse {
+  background: #e2e8f0;
+  animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.skeleton-media {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+}
+
+.skeleton-line {
+  border-radius: 8px;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
 .card-media img {
   width: 100%;
   height: 100%;
