@@ -275,13 +275,16 @@ function renderItems() {
 
   empty.classList.add('hidden');
   grid.innerHTML = state.items
-    .map(item => {
+    .map((item, idx) => {
       const isDone = item.status === 'intercambiado';
       const typeLabel = item.type === 'regalo' ? '🎁 REGALO' : '🔄 TRUEQUE';
       const typeClass = item.type === 'regalo' ? 'tag-regalo' : 'tag-trueque';
       const blurSrc = getBlurPlaceholder(item);
+      const priorityAttrs = idx === 0
+        ? 'fetchpriority="high" decoding="async"'
+        : 'loading="lazy" decoding="async" fetchpriority="low"';
       const media = item.imageUrl
-        ? `${blurSrc ? `<img class="card-blur-img" src="${escapeHtml(blurSrc)}" alt="" aria-hidden="true" />` : '<div class="card-blur-overlay"></div>'}<img class="card-full-img" src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.title)}" loading="lazy" decoding="async" fetchpriority="low" onload="this.parentElement.classList.add('is-loaded')" onerror="this.parentElement.classList.add('is-loaded');this.outerHTML='<div class=\\'card-placeholder\\'>📦</div>'" />`
+        ? `${blurSrc ? `<img class="card-blur-img" src="${escapeHtml(blurSrc)}" alt="" aria-hidden="true" />` : '<div class="card-blur-overlay"></div>'}<img class="card-full-img" src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.title)}" ${priorityAttrs} onload="this.parentElement.classList.add('is-loaded')" onerror="this.parentElement.classList.add('is-loaded');this.outerHTML='<div class=\\'card-placeholder\\'>📦</div>'" />`
         : `<div class="card-placeholder">📦</div>`;
 
       return `
