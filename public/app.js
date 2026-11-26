@@ -271,12 +271,12 @@ function renderItems() {
       const typeLabel = item.type === 'regalo' ? '🎁 REGALO' : '🔄 TRUEQUE';
       const typeClass = item.type === 'regalo' ? 'tag-regalo' : 'tag-trueque';
       const media = item.imageUrl
-        ? `<img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.title)}" loading="lazy" decoding="async" onload="this.parentElement.classList.remove('is-loading')" onerror="this.parentElement.classList.remove('is-loading');this.outerHTML='<div class=\\'card-placeholder\\'>📦</div>'" />`
+        ? `<div class="card-blur-overlay"></div><img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.title)}" loading="lazy" decoding="async" onload="this.parentElement.classList.add('is-loaded')" onerror="this.parentElement.classList.add('is-loaded');this.outerHTML='<div class=\\'card-placeholder\\'>📦</div>'" />`
         : `<div class="card-placeholder">📦</div>`;
 
       return `
         <article class="card" data-item-id="${item.id}">
-          <div class="card-media ${item.imageUrl ? 'is-loading' : ''}">
+          <div class="card-media ${item.imageUrl ? '' : 'is-loaded'}">
             ${media}
             <div class="card-badges">
               <span class="tag ${typeClass}">${typeLabel}</span>
