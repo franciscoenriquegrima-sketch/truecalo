@@ -352,6 +352,127 @@ function renderItems() {
     .join('');
 }
 
+function attachPanPinchZoom(wrap, img) {
+  let scale = 1;
+  let tx = 0;
+  let ty = 0;
+  let lastTap = 0;
+  let dragging = false;
+  let startX = 0;
+  let startY = 0;
+  let pinchStartDist = 0;
+  let pinchStartScale = 1;
+
+  const badge = wrap.querySelector('.zoom-level-badge');
+
+  function clampTranslate(nextTx, nextTy, s) {
+    const rect = wrap.getBoundingClientRect();
+    const maxX = Math.max(0, (rect.width * (s - 1)) / 2);
+    const maxY = Math.max(0, (rect.height * (s - 1)) / 2);
+    return [
+      Math.min(maxX, Math.max(-maxX, nextTx)),
+      Math.min(maxY, Math.max(-maxY, nextTy))
+    ];
+  }
+
+  function applyTransform(animate = false) {
+    [tx, ty] = clampTranslate(tx, ty, scale);
+    img.style.transition = animate ? 'transform 0.25s ease' : 'none';
+    img.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(${scale})`;
+    wrap.classList.toggle('is-zoomed', scale > 1.02);
+    wrap.style.touchAction = scale > 1.02 ? 'none' : 'pan-y';
+    if (badge) badge.textContent = scale > 1.02 ? `🔍 ${scale.toFixed(1)}× (doble toque para reiniciar)` : '🔍 Pellizca o doble toque';
+  }
+
+  function setScale(nextScale, animate = false) {
+    scale = Math.min(4, Math.max(1, nextScale));
+    if (scale === 1) {
+      tx = 0;
+      ty = 0;
+    }
+    applyTransform(animate);
+  }
+
+  wrap.addEventListener('dblclick', e => {
+    e.preventDefault();
+    if (scale > 1.2) {
+      setScale(1, true);
+    } else {
+      setScale(2.4, true);
+    }
+  });
+
+  wrap.addEventListener('wheel', e => {
+    e.preventDefault();
+    const delta = e.deltaY < 0 ? 0.25 : -0.25;
+    setScale(scale + delta, false);
+  }, { passive: false });
+
+  wrap.addEventListener('mousedown', e => {
+    if (scale <= 1.02) return;
+    dragging = true;
+    startX = e.clientX - tx;
+    startY = e.clientY - ty;
+  });
+
+  window.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    tx = e.clientX - startX;
+    ty = e.clientY - startY;
+    applyTransform(false);
+  });
+
+  window.addEventListener('mouseup', () => {
+    dragging = false;
+  });
+
+  wrap.addEventListener('touchstart', e => {
+    if (e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      pinchStartDist = Math.hypot(dx, dy);
+      pinchStartScale = scale;
+      dragging = false;
+    } else if (e.touches.length === 1) {
+      const now = Date.now();
+      if (now - lastTap < 280) {
+        e.preventDefault();
+        setScale(scale > 1.2 ? 1 : 2.4, true);
+        lastTap = 0;
+        return;
+      }
+      lastTap = now;
+      if (scale > 1.02) {
+        dragging = true;
+        startX = e.touches[0].clientX - tx;
+        startY = e.touches[0].clientY - ty;
+      }
+    }
+  }, { passive: false });
+
+  wrap.addEventListener('touchmove', e => {
+    if (e.touches.length === 2 && pinchStartDist > 0) {
+      e.preventDefault();
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.hypot(dx, dy);
+      setScale(pinchStartScale * (dist / pinchStartDist), false);
+    } else if (e.touches.length === 1 && dragging && scale > 1.02) {
+      e.preventDefault();
+      tx = e.touches[0].clientX - startX;
+      ty = e.touches[0].clientY - startY;
+      applyTransform(false);
+    }
+  }, { passive: false });
+
+  wrap.addEventListener('touchend', () => {
+    dragging = false;
+    pinchStartDist = 0;
+  });
+
+  applyTransform(false);
+}
+
 async function openItemDetail(itemId) {
   const item = state.items.find(i => i.id === itemId) || (await api(`/api/items`)).find(i => i.id === itemId);
   if (!item) return;
@@ -368,7 +489,7 @@ async function openItemDetail(itemId) {
   }
 
   const mediaHtml = item.imageUrl
-    ? `<div class="detail-zoom-wrap" id="detailZoomWrap" title="Toca o haz clic para ampliar"><img class="detail-img" src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.title)}" decoding="async" onerror="this.outerHTML='<div class=\\'detail-img card-placeholder\\'>📦</div>'" /></div>`
+    ? `<div class="detail-zoom-wrap" id="detailZoomWrap" title="Pellizca, arrastra o haz doble clic para ampliar"><img class="detail-img" src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.title)}" decoding="async" draggable="false" onerror="this.outerHTML='<div class=\\'detail-img card-placeholder\\'>📦</div>'" /><span class="zoom-level-badge">🔍 Pellizca o doble toque</span></div>`
     : `<div class="detail-img card-placeholder">📦</div>`;
 
   let actionHtml = '';
@@ -477,19 +598,11 @@ async function openItemDetail(itemId) {
     </div>
   `;
 
-  $('#detailZoomWrap')?.addEventListener('click', e => {
-    const wrap = e.currentTarget;
-    const img = wrap.querySelector('.detail-img');
-    if (!img) return;
-    const willZoom = !wrap.classList.contains('is-zoomed');
-    if (willZoom) {
-      const rect = wrap.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width) * 100;
-      const y = ((e.clientY - rect.top) / rect.height) * 100;
-      img.style.transformOrigin = `${x}% ${y}%`;
-    }
-    wrap.classList.toggle('is-zoomed', willZoom);
-  });
+  const zoomWrap = $('#detailZoomWrap');
+  const zoomImg = zoomWrap?.querySelector('.detail-img');
+  if (zoomWrap && zoomImg) {
+    attachPanPinchZoom(zoomWrap, zoomImg);
+  }
 
   if (isMine && isAvailable) {
     $('#btnEditThisItem')?.addEventListener('click', () => {

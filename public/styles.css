@@ -960,10 +960,15 @@ textarea {
   touch-action: pan-y;
   background: var(--surface-alt);
   cursor: zoom-in;
+  user-select: none;
 }
 
 .detail-zoom-wrap.is-zoomed {
-  cursor: zoom-out;
+  cursor: grab;
+}
+
+.detail-zoom-wrap.is-zoomed:active {
+  cursor: grabbing;
 }
 
 .detail-img {
@@ -973,12 +978,21 @@ textarea {
   border-radius: 12px;
   background: var(--surface-alt);
   display: block;
-  transform: scale(1);
-  transition: transform 0.3s ease;
+  transform-origin: center center;
+  will-change: transform;
 }
 
-.detail-zoom-wrap.is-zoomed .detail-img {
-  transform: scale(1.5);
+.zoom-level-badge {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(17, 24, 39, 0.72);
+  color: #fff;
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  pointer-events: none;
 }
 
 .detail-info h2 {
