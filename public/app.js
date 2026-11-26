@@ -265,7 +265,7 @@ function renderItems() {
           </div>
           <div class="card-body">
             <h3 class="card-title">${escapeHtml(item.title)}</h3>
-            <p class="card-location">📍 ${escapeHtml(item.location)} · 📅 ${formatRelativeDate(item.createdAt)}</p>
+            <p class="card-location">📍 ${escapeHtml(item.location)}</p>
             <div class="card-condition-row">
               <span class="condition-pill">${escapeHtml(item.condition)}</span>
               <span class="category-pill-mini">${escapeHtml(item.category)}</span>
