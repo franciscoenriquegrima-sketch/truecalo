@@ -1793,6 +1793,23 @@ textarea {
   font-weight: 700;
 }
 
+.a11y-nav-help {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  font-size: 0.84rem;
+}
+
+.a11y-nav-help ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 html.a11y-large-text {
   font-size: 18px;
 }

@@ -1366,6 +1366,8 @@ function initAccessibility() {
   const btnContrast = $('#btnA11yHighContrast');
   const btnSpeech = $('#btnA11ySpeech');
   const btnMotion = $('#btnA11yReducedMotion');
+  const btnNavHelp = $('#btnA11yNavHelp');
+  const navHelpBox = $('#a11yNavHelpBox');
 
   function syncUI() {
     applyA11yPrefs(prefs);
@@ -1393,6 +1395,11 @@ function initAccessibility() {
   btnMotion?.addEventListener('click', () => {
     prefs.reducedMotion = !prefs.reducedMotion;
     save();
+  });
+
+  btnNavHelp?.addEventListener('click', () => {
+    const isHidden = navHelpBox?.classList.toggle('hidden');
+    btnNavHelp.classList.toggle('active', !isHidden);
   });
 
   btnSpeech?.addEventListener('click', () => {
