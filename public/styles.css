@@ -954,9 +954,71 @@ textarea {
 }
 
 .detail-gallery-wrap {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.btn-fullscreen {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 4;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(17, 24, 39, 0.72);
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.lightbox-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  background: rgba(0, 0, 0, 0.94);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.lightbox-close {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 260;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(17, 24, 39, 0.8);
+  color: #fff;
+  font-size: 1.15rem;
+  cursor: pointer;
+}
+
+.lightbox-stage {
+  width: min(1000px, 100%);
+  max-height: 90vh;
+}
+
+.lightbox-gallery {
+  border-radius: 16px;
+}
+
+.lightbox-img {
+  width: 100%;
+  max-height: 85vh;
+  object-fit: contain;
+  display: block;
+  background: #0b0f17;
+  transform-origin: center center;
+  will-change: transform;
 }
 
 .detail-gallery {

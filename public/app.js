@@ -498,6 +498,7 @@ async function openItemDetail(itemId) {
   const mediaHtml = gallery.length
     ? `
       <div class="detail-gallery-wrap">
+        <button type="button" class="btn-fullscreen" id="btnOpenFullscreen" aria-label="Ver a pantalla completa" title="Pantalla completa">⛶</button>
         <div class="detail-gallery" id="detailGallery">
           ${gallery
             .map(
@@ -643,6 +644,34 @@ async function openItemDetail(itemId) {
     galleryEl.addEventListener('scroll', () => {
       const idx = Math.round(galleryEl.scrollLeft / Math.max(1, galleryEl.clientWidth));
       $$('#galleryDots .gallery-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+    });
+
+    $('#btnOpenFullscreen')?.addEventListener('click', () => {
+      const stage = $('#lightboxStage');
+      stage.innerHTML = `
+        <div class="detail-gallery lightbox-gallery" id="lightboxGallery">
+          ${gallery
+            .map(
+              (src, i) => `
+            <div class="detail-slide detail-zoom-wrap">
+              <img class="lightbox-img" src="${escapeHtml(src)}" alt="${escapeHtml(item.title)} (${i + 1})" draggable="false" />
+              <span class="zoom-level-badge">🔍 Pellizca o doble toque</span>
+            </div>
+          `
+            )
+            .join('')}
+        </div>
+      `;
+      $('#lightboxModal').classList.remove('hidden');
+      const activeIdx = Math.round(galleryEl.scrollLeft / Math.max(1, galleryEl.clientWidth));
+      const lbGallery = $('#lightboxGallery');
+      if (lbGallery && activeIdx > 0) {
+        lbGallery.scrollLeft = activeIdx * lbGallery.clientWidth;
+      }
+      $$('#lightboxGallery .detail-zoom-wrap').forEach(zw => {
+        const zi = zw.querySelector('.lightbox-img');
+        if (zi) attachPanPinchZoom(zw, zi);
+      });
     });
   }
 
@@ -847,8 +876,16 @@ function bindEvents() {
 
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
+      $('#lightboxModal')?.classList.add('hidden');
       $$('.modal-backdrop:not(.hidden)').forEach(m => closeModal(m.id));
     }
+  });
+
+  $('#btnCloseLightbox')?.addEventListener('click', () => {
+    $('#lightboxModal').classList.add('hidden');
+  });
+  $('#lightboxModal')?.addEventListener('click', e => {
+    if (e.target === e.currentTarget) $('#lightboxModal').classList.add('hidden');
   });
 
   window.addEventListener('popstate', () => {
