@@ -13,6 +13,7 @@ const state = {
   },
   activeTab: 'received',
   uploadedImageDataUrl: '',
+  uploadedThumbDataUrl: '',
   uploadedBlurDataUrl: ''
 };
 
@@ -255,6 +256,14 @@ function renderSkeletons(count = 6) {
     .join('');
 }
 
+function getCardThumbUrl(item) {
+  if (item.thumbImageUrl) return item.thumbImageUrl;
+  if (item.imageUrl && item.imageUrl.includes('images.unsplash.com')) {
+    return item.imageUrl.replace(/w=\d+/, 'w=600').replace(/q=\d+/, 'q=75');
+  }
+  return item.imageUrl || '';
+}
+
 function getBlurPlaceholder(item) {
   if (item.blurImageUrl) return item.blurImageUrl;
   if (item.imageUrl && item.imageUrl.includes('images.unsplash.com')) {
@@ -280,11 +289,12 @@ function renderItems() {
       const typeLabel = item.type === 'regalo' ? '🎁 REGALO' : '🔄 TRUEQUE';
       const typeClass = item.type === 'regalo' ? 'tag-regalo' : 'tag-trueque';
       const blurSrc = getBlurPlaceholder(item);
+      const cardSrc = getCardThumbUrl(item);
       const priorityAttrs = idx === 0
         ? 'fetchpriority="high" decoding="async"'
         : 'loading="lazy" decoding="async" fetchpriority="low"';
-      const media = item.imageUrl
-        ? `${blurSrc ? `<img class="card-blur-img" src="${escapeHtml(blurSrc)}" alt="" aria-hidden="true" />` : '<div class="card-blur-overlay"></div>'}<img class="card-full-img" src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.title)}" ${priorityAttrs} onload="this.parentElement.classList.add('is-loaded')" onerror="this.parentElement.classList.add('is-loaded');this.outerHTML='<div class=\\'card-placeholder\\'>📦</div>'" />`
+      const media = cardSrc
+        ? `${blurSrc ? `<img class="card-blur-img" src="${escapeHtml(blurSrc)}" alt="" aria-hidden="true" />` : '<div class="card-blur-overlay"></div>'}<img class="card-full-img" src="${escapeHtml(cardSrc)}" alt="${escapeHtml(item.title)}" ${priorityAttrs} onload="this.parentElement.classList.add('is-loaded')" onerror="this.parentElement.classList.add('is-loaded');this.outerHTML='<div class=\\'card-placeholder\\'>📦</div>'" />`
         : `<div class="card-placeholder">📦</div>`;
 
       return `
@@ -522,8 +532,9 @@ async function openItemDetail(itemId) {
 
 function openPublishModal(itemToEdit = null) {
   state.uploadedImageDataUrl = '';
+  state.uploadedThumbDataUrl = '';
   state.uploadedBlurDataUrl = '';
-  $('#imageFileHint').textContent = '1200×900 px · Máx. 1 MB · Formato WebP';
+  $('#imageFileHint').textContent = '600×450 / 1200×900 px · Máx. 300 KB · WebP/AVIF';
   $('#itemImageFile').value = '';
 
   if (itemToEdit) {
@@ -776,6 +787,32 @@ function bindEvents() {
     }
   });
 
+  function encodeWithinLimit(img, maxW, maxH, maxBytes) {
+    const scale = Math.min(1, maxW / img.width, maxH / img.height);
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(img.width * scale);
+    canvas.height = Math.round(img.height * scale);
+    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    // Prefer AVIF if browser supports encoding it, else WebP
+    const testAvif = canvas.toDataURL('image/avif', 0.8);
+    const mime = testAvif.startsWith('data:image/avif') ? 'image/avif' : 'image/webp';
+
+    let dataUrl = '';
+    for (const q of [0.82, 0.7, 0.58, 0.45, 0.35]) {
+      dataUrl = canvas.toDataURL(mime, q);
+      const bytes = Math.ceil((dataUrl.length * 3) / 4);
+      if (bytes <= maxBytes) break;
+    }
+    return {
+      dataUrl,
+      bytes: Math.ceil((dataUrl.length * 3) / 4),
+      width: canvas.width,
+      height: canvas.height,
+      format: mime === 'image/avif' ? 'AVIF' : 'WebP'
+    };
+  }
+
   $('#itemImageFile').addEventListener('change', e => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -783,38 +820,22 @@ function bindEvents() {
     reader.onload = () => {
       const img = new Image();
       img.onload = () => {
-        const maxW = 1200;
-        const maxH = 900;
-        const scale = Math.min(1, maxW / img.width, maxH / img.height);
-        const canvas = document.createElement('canvas');
-        canvas.width = Math.round(img.width * scale);
-        canvas.height = Math.round(img.height * scale);
-        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-
-        let compressed = '';
-        for (const q of [0.85, 0.72, 0.58, 0.45]) {
-          compressed = canvas.toDataURL('image/webp', q);
-          const approxBytes = Math.ceil((compressed.length * 3) / 4);
-          if (approxBytes <= 1024 * 1024) break;
-        }
-
-        const finalBytes = Math.ceil((compressed.length * 3) / 4);
-        if (finalBytes > 1024 * 1024) {
-          showToast('La imagen supera 1 MB incluso tras optimizarla. Elige otra más ligera.', true);
+        const maxBytes = 300 * 1024;
+        const detail = encodeWithinLimit(img, 1200, 900, maxBytes);
+        if (detail.bytes > maxBytes) {
+          showToast('La imagen supera los 300 KB incluso tras optimizarla. Elige otra más ligera.', true);
           return;
         }
+        const thumb = encodeWithinLimit(img, 600, 450, 120 * 1024);
+        const blur = encodeWithinLimit(img, 32, 24, 15 * 1024);
 
-        const kb = Math.round(finalBytes / 1024);
-        // Generate tiny 32x24 LQIP blur placeholder
-        const blurCanvas = document.createElement('canvas');
-        blurCanvas.width = 32;
-        blurCanvas.height = 24;
-        blurCanvas.getContext('2d').drawImage(img, 0, 0, 32, 24);
-        state.uploadedBlurDataUrl = blurCanvas.toDataURL('image/webp', 0.35);
+        state.uploadedImageDataUrl = detail.dataUrl;
+        state.uploadedThumbDataUrl = thumb.dataUrl;
+        state.uploadedBlurDataUrl = blur.dataUrl;
 
-        state.uploadedImageDataUrl = compressed;
-        $('#imageFileHint').textContent = `${canvas.width}×${canvas.height} WebP (${kb} KB)`;
-        $('#imagePreview').src = compressed;
+        const kb = Math.round(detail.bytes / 1024);
+        $('#imageFileHint').textContent = `${detail.width}×${detail.height} ${detail.format} (${kb} KB) + miniatura 600×450`;
+        $('#imagePreview').src = detail.dataUrl;
         $('#imagePreview').classList.remove('hidden');
       };
       img.src = reader.result;
@@ -836,6 +857,7 @@ function bindEvents() {
       lookingFor: $('#itemLookingFor').value,
       description: $('#itemDescription').value,
       imageUrl: state.uploadedImageDataUrl || $('#itemImageUrl').value.trim(),
+      thumbImageUrl: state.uploadedThumbDataUrl || '',
       blurImageUrl: state.uploadedBlurDataUrl || ''
     };
 

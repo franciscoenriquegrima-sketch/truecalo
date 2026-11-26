@@ -90,7 +90,7 @@ function verifyPassword(password, stored) {
 function isSafeImageUrl(url) {
   if (!url) return true;
   if (url.length > 1500000) return false;
-  if (/^data:image\/(png|jpeg|jpg|webp|gif);base64,[A-Za-z0-9+/=]+$/i.test(url)) {
+  if (/^data:image\/(png|jpeg|jpg|webp|avif|gif);base64,[A-Za-z0-9+/=]+$/i.test(url)) {
     return true;
   }
   if (url.length > 2048) return false;
@@ -427,13 +427,14 @@ app.get('/api/items', (req, res) => {
 });
 
 app.post('/api/items', (req, res) => {
-  const { ownerId, title, description, category, condition, type, lookingFor, location, imageUrl, blurImageUrl } = req.body || {};
+  const { ownerId, title, description, category, condition, type, lookingFor, location, imageUrl, thumbImageUrl, blurImageUrl } = req.body || {};
   if (!ownerId || !title || !title.trim() || !description || !description.trim()) {
     return res.status(400).json({ error: 'Faltan campos obligatorios (título, descripción y usuario).' });
   }
   const cleanImg = (imageUrl || '').trim();
+  const cleanThumb = (thumbImageUrl || '').trim();
   const cleanBlur = (blurImageUrl || '').trim();
-  if (!isSafeImageUrl(cleanImg) || !isSafeImageUrl(cleanBlur)) {
+  if (!isSafeImageUrl(cleanImg) || !isSafeImageUrl(cleanThumb) || !isSafeImageUrl(cleanBlur)) {
     return res.status(400).json({ error: 'La URL de la imagen no es válida.' });
   }
 
@@ -455,6 +456,7 @@ app.post('/api/items', (req, res) => {
       : clampStr(lookingFor || 'Abierto a propuestas interesantes', 200),
     location: clampStr(location || owner.city || 'Sin ubicación', 100),
     imageUrl: cleanImg,
+    thumbImageUrl: cleanThumb,
     blurImageUrl: cleanBlur,
     status: 'disponible',
     createdAt: new Date().toISOString()
@@ -475,7 +477,7 @@ app.put('/api/items/:id', (req, res) => {
   const item = db.items.find(i => i.id === req.params.id);
   if (!item) return res.status(404).json({ error: 'Objeto no encontrado.' });
 
-  const { userId, title, description, category, condition, type, lookingFor, location, imageUrl, blurImageUrl, status } = req.body || {};
+  const { userId, title, description, category, condition, type, lookingFor, location, imageUrl, thumbImageUrl, blurImageUrl, status } = req.body || {};
   if (!userId || item.ownerId !== userId) {
     return res.status(403).json({ error: 'No tienes permiso para editar este objeto.' });
   }
@@ -493,6 +495,13 @@ app.put('/api/items/:id', (req, res) => {
       return res.status(400).json({ error: 'La URL de la imagen no es válida.' });
     }
     item.imageUrl = cleanImg;
+  }
+  if (typeof thumbImageUrl === 'string') {
+    const cleanThumb = thumbImageUrl.trim();
+    if (!isSafeImageUrl(cleanThumb)) {
+      return res.status(400).json({ error: 'La URL de miniatura no es válida.' });
+    }
+    item.thumbImageUrl = cleanThumb;
   }
   if (typeof blurImageUrl === 'string') {
     const cleanBlur = blurImageUrl.trim();
