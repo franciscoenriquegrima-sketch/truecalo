@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Minijuegos — Serpiente Nokia y Damas | TRUECALO</title>
+  <meta name="description" content="Juega gratis a la Serpiente clásica estilo Nokia y a las Damas mientras exploras trueques en TRUECALO." />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="navbar">
+    <div class="container nav-inner">
+      <a href="/" class="brand" aria-label="Volver a TRUECALO">
+        <img src="/logo.svg" alt="TRUECALO" class="brand-logo" />
+      </a>
+      <div class="nav-actions">
+        <a href="/" class="btn btn-outline">← Volver al catálogo</a>
+        <a href="/registro" class="btn btn-primary">Hazte miembro · 20 €</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container games-page">
+    <div class="games-header">
+      <span class="hero-tag">Zona de ocio · Gratis para la comunidad</span>
+      <h1>Minijuegos TRUECALO</h1>
+      <p>Desconecta un rato entre trueque y trueque con estos dos clásicos.</p>
+    </div>
+
+    <div class="tabs games-tabs">
+      <button class="tab active" data-game="snake">🐍 Serpiente (Nokia)</button>
+      <button class="tab" data-game="checkers">⚫ Damas</button>
+    </div>
+
+    <!-- JUEGO 1: SERPIENTE ESTILO NOKIA -->
+    <section class="game-panel" id="panelSnake">
+      <div class="nokia-shell">
+        <div class="nokia-brand">NOKIA · TRUECALO</div>
+        <div class="nokia-screen-bezel">
+          <div class="nokia-hud">
+            <span>Puntos: <strong id="snakeScore">0</strong></span>
+            <span>Récord: <strong id="snakeBest">0</strong></span>
+          </div>
+          <canvas id="snakeCanvas" width="320" height="320" aria-label="Juego de la serpiente"></canvas>
+        </div>
+        <div class="nokia-controls">
+          <div class="dpad">
+            <button type="button" class="dpad-btn dpad-up" data-dir="UP" aria-label="Arriba">▲</button>
+            <button type="button" class="dpad-btn dpad-left" data-dir="LEFT" aria-label="Izquierda">◀</button>
+            <button type="button" class="dpad-btn dpad-right" data-dir="RIGHT" aria-label="Derecha">▶</button>
+            <button type="button" class="dpad-btn dpad-down" data-dir="DOWN" aria-label="Abajo">▼</button>
+          </div>
+          <div class="nokia-meta-btns">
+            <button type="button" class="btn btn-primary btn-sm" id="btnSnakeStart">Iniciar / Reiniciar</button>
+            <button type="button" class="btn btn-outline btn-sm" id="btnSnakePause">Pausa</button>
+          </div>
+          <p class="game-hint">Usa las flechas del teclado, WASD o los botones táctiles.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- JUEGO 2: DAMAS -->
+    <section class="game-panel hidden" id="panelCheckers">
+      <div class="checkers-card">
+        <div class="checkers-topbar">
+          <div>
+            <strong id="checkersStatus">Turno: Fichas Verdes (Tú)</strong>
+            <div class="checkers-counts" id="checkersCounts">Verdes: 12 · Terracota: 12</div>
+          </div>
+          <div class="checkers-controls">
+            <select id="checkersMode" aria-label="Modo de juego">
+              <option value="ai">1 Jugador vs Máquina</option>
+              <option value="2p">2 Jugadores (mismo dispositivo)</option>
+            </select>
+            <button type="button" class="btn btn-primary btn-sm" id="btnCheckersReset">Nueva partida</button>
+          </div>
+        </div>
+
+        <div class="checkers-board" id="checkersBoard" role="grid" aria-label="Tablero de damas"></div>
+        <p class="game-hint">Haz clic en una ficha para ver sus movimientos en diagonal. Al llegar al otro extremo se corona como Dama (👑).</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <p><strong>TRUECALO</strong> · Si te interesa, cámbialo.</p>
+      <nav class="footer-links" aria-label="Enlaces legales">
+        <a href="/privacidad">Privacidad</a>
+        <a href="/cookies">Cookies</a>
+        <a href="/terminos">Términos</a>
+        <a href="/contacto">Contacto</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="/juegos.js"></script>
+</body>
+</html>

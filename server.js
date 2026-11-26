@@ -83,11 +83,11 @@ app.get('/sitemap.xml', (req, res) => {
       changefreq: 'daily',
       priority: '1.0'
     },
-    ...['privacidad', 'cookies', 'terminos', 'contacto', 'registro'].map(page => ({
+    ...['privacidad', 'cookies', 'terminos', 'contacto', 'registro', 'juegos'].map(page => ({
       loc: `${baseUrl}/${page}`,
       lastmod: today,
       changefreq: 'monthly',
-      priority: page === 'registro' ? '0.9' : '0.4'
+      priority: page === 'registro' ? '0.9' : '0.5'
     })),
     ...db.items
       .filter(i => i.status === 'disponible')
@@ -109,8 +109,8 @@ app.get('/sitemap.xml', (req, res) => {
   res.type('application/xml').send(xml);
 });
 
-// Clean routes for AdSense-required legal, contact & registration pages
-['privacidad', 'cookies', 'terminos', 'contacto', 'registro'].forEach(page => {
+// Clean routes for AdSense-required legal, contact, registration & games pages
+['privacidad', 'cookies', 'terminos', 'contacto', 'registro', 'juegos'].forEach(page => {
   app.get(`/${page}`, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', `${page}.html`));
   });
