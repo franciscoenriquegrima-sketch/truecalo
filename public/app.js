@@ -1345,5 +1345,51 @@ function initCookieConsent() {
   });
 }
 
+// Accessibility Preferences
+const A11Y_STORAGE_KEY = 'truecalo_a11y';
+
+function applyA11yPrefs(prefs) {
+  const root = document.documentElement;
+  root.classList.toggle('a11y-large-text', Boolean(prefs.largeText));
+  root.classList.toggle('a11y-high-contrast', Boolean(prefs.highContrast));
+  root.classList.toggle('a11y-reduced-motion', Boolean(prefs.reducedMotion));
+}
+
+function initAccessibility() {
+  let prefs = { largeText: false, highContrast: false, reducedMotion: false };
+  try {
+    const saved = localStorage.getItem(A11Y_STORAGE_KEY);
+    if (saved) prefs = { ...prefs, ...JSON.parse(saved) };
+  } catch {}
+
+  applyA11yPrefs(prefs);
+  $('#a11yLargeText').checked = prefs.largeText;
+  $('#a11yHighContrast').checked = prefs.highContrast;
+  $('#a11yReducedMotion').checked = prefs.reducedMotion;
+
+  function saveAndApply() {
+    prefs = {
+      largeText: $('#a11yLargeText').checked,
+      highContrast: $('#a11yHighContrast').checked,
+      reducedMotion: $('#a11yReducedMotion').checked
+    };
+    localStorage.setItem(A11Y_STORAGE_KEY, JSON.stringify(prefs));
+    applyA11yPrefs(prefs);
+  }
+
+  $('#btnA11yFloat')?.addEventListener('click', () => openModal('a11yModal'));
+  $('#a11yLargeText')?.addEventListener('change', saveAndApply);
+  $('#a11yHighContrast')?.addEventListener('change', saveAndApply);
+  $('#a11yReducedMotion')?.addEventListener('change', saveAndApply);
+  $('#btnA11yReset')?.addEventListener('click', () => {
+    $('#a11yLargeText').checked = false;
+    $('#a11yHighContrast').checked = false;
+    $('#a11yReducedMotion').checked = false;
+    saveAndApply();
+    showToast('Opciones de accesibilidad restablecidas.');
+  });
+}
+
 init();
 initCookieConsent();
+initAccessibility();

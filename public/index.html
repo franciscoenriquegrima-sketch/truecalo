@@ -384,6 +384,47 @@
     <button type="button" class="mob-nav-btn" id="mobNavProfile" aria-label="Perfil">👤</button>
   </nav>
 
+  <!-- Botón flotante de accesibilidad -->
+  <button type="button" class="a11y-float-btn" id="btnA11yFloat" aria-label="Opciones de accesibilidad" title="Opciones de accesibilidad">
+    ♿
+  </button>
+
+  <!-- Modal: Opciones de accesibilidad -->
+  <div class="modal-backdrop hidden" id="a11yModal" role="dialog" aria-modal="true" aria-labelledby="a11yModalTitle">
+    <div class="modal">
+      <button class="modal-close" data-close="a11yModal" aria-label="Cerrar">✕</button>
+      <h2 id="a11yModalTitle">♿ Opciones de accesibilidad</h2>
+      <p class="modal-subtitle">Adapta TRUECALO a tus necesidades visuales o de lectura.</p>
+      <div class="form-stack">
+        <label class="cookie-option cookie-toggle-row">
+          <div>
+            <strong>Texto más grande</strong>
+            <p class="cookie-opt-desc">Aumenta el tamaño general de la tipografía para leer con mayor comodidad.</p>
+          </div>
+          <input type="checkbox" id="a11yLargeText" />
+        </label>
+        <label class="cookie-option cookie-toggle-row">
+          <div>
+            <strong>Alto contraste</strong>
+            <p class="cookie-opt-desc">Refuerza bordes y contraste entre textos y fondos.</p>
+          </div>
+          <input type="checkbox" id="a11yHighContrast" />
+        </label>
+        <label class="cookie-option cookie-toggle-row">
+          <div>
+            <strong>Reducir animaciones</strong>
+            <p class="cookie-opt-desc">Desactiva transiciones y efectos de movimiento en toda la web.</p>
+          </div>
+          <input type="checkbox" id="a11yReducedMotion" />
+        </label>
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline" id="btnA11yReset">Restablecer</button>
+          <button type="button" class="btn btn-primary" data-close="a11yModal">Listo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal: Galería a pantalla completa -->
   <div class="lightbox-backdrop hidden" id="lightboxModal" role="dialog" aria-modal="true" aria-label="Imagen a pantalla completa">
     <button type="button" class="lightbox-close" id="btnCloseLightbox" aria-label="Cerrar pantalla completa">✕</button>

@@ -1723,6 +1723,53 @@ textarea {
   border: 2px solid #a5b4fc;
 }
 
+/* Accessibility Floating Button & Modes */
+.a11y-float-btn {
+  position: fixed;
+  bottom: 84px;
+  right: 16px;
+  z-index: 95;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  background: #00B8FF;
+  color: #ffffff;
+  font-size: 1.5rem;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(0, 184, 255, 0.38);
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.a11y-float-btn:hover {
+  transform: scale(1.06);
+  filter: brightness(1.05);
+}
+
+html.a11y-large-text {
+  font-size: 18px;
+}
+
+html.a11y-high-contrast {
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface-alt: #f1f5f9;
+  --text: #000000;
+  --muted: #1f2937;
+  --border: #475569;
+}
+
+html.a11y-reduced-motion *,
+html.a11y-reduced-motion *::before,
+html.a11y-reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
 .mobile-bottom-nav {
   display: none;
 }
