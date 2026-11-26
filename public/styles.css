@@ -1825,10 +1825,19 @@ html.a11y-high-contrast .brand-title {
 html.a11y-reduced-motion *,
 html.a11y-reduced-motion *::before,
 html.a11y-reduced-motion *::after {
-  animation-duration: 0.01ms !important;
-  animation-iteration-count: 1 !important;
-  transition-duration: 0.01ms !important;
+  animation: none !important;
+  transition: none !important;
   scroll-behavior: auto !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 .mobile-bottom-nav {
