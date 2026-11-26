@@ -95,8 +95,17 @@
 
           <label for="heroSearchInput" class="hero-search-label">🔍 ¿Qué buscas hoy?</label>
           <div class="hero-search-box">
-            <input type="search" id="heroSearchInput" placeholder="Buscar artículos, ciudades..." aria-label="Buscar artículos o ciudades" />
-            <button type="button" class="btn btn-primary" id="btnHeroSearch">Buscar</button>
+            <span class="hero-search-icon" aria-hidden="true">🔍</span>
+            <input type="search" id="heroSearchInput" placeholder="Buscar bicicleta, guitarra, libros, Madrid..." aria-label="Buscar artículos o ciudades" />
+            <button type="button" class="btn btn-primary btn-hero-search" id="btnHeroSearch">Buscar</button>
+          </div>
+          <div class="hero-quick-tags" id="heroQuickTags" aria-label="Búsquedas populares">
+            <span>Populares:</span>
+            <button type="button" class="quick-tag" data-query="Bicicleta">🚲 Bicicleta</button>
+            <button type="button" class="quick-tag" data-query="Guitarra">🎸 Guitarra</button>
+            <button type="button" class="quick-tag" data-query="Cafetera">☕ Cafetera</button>
+            <button type="button" class="quick-tag" data-query="Libros">📚 Libros</button>
+            <button type="button" class="quick-tag" data-query="Madrid">📍 Madrid</button>
           </div>
 
           <ul class="hero-check-stats" aria-label="Impacto de la comunidad">

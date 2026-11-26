@@ -923,6 +923,17 @@ function bindEvents() {
     document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth' });
   });
 
+  $('#heroQuickTags')?.addEventListener('click', e => {
+    const tag = e.target.closest('.quick-tag');
+    if (!tag) return;
+    const query = tag.dataset.query || '';
+    $('#searchInput').value = query;
+    $('#heroSearchInput').value = query;
+    state.filters.q = query;
+    loadItems();
+    document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth' });
+  });
+
   $('#categoryPills').addEventListener('click', e => {
     const pill = e.target.closest('.pill');
     if (!pill) return;
