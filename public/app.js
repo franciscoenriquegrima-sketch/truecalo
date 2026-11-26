@@ -67,6 +67,17 @@ function getInitials(name = '') {
     .join('') || '?';
 }
 
+function formatRelativeDate(iso) {
+  if (!iso) return 'Reciente';
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const days = Math.max(0, Math.floor(diffMs / 86400000));
+  if (days === 0) return 'Hoy';
+  if (days === 1) return 'Ayer';
+  if (days < 30) return `Hace ${days} días`;
+  const months = Math.floor(days / 30);
+  return months === 1 ? 'Hace 1 mes' : `Hace ${months} meses`;
+}
+
 // Init & Data Loading
 async function init() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -210,7 +221,7 @@ function renderItems() {
           </div>
           <div class="card-body">
             <h3 class="card-title">${escapeHtml(item.title)}</h3>
-            <p class="card-location">📍 ${escapeHtml(item.location)}</p>
+            <p class="card-location">📍 ${escapeHtml(item.location)} · 📅 ${formatRelativeDate(item.createdAt)}</p>
             <div class="card-condition-row">
               <span class="condition-pill">${escapeHtml(item.condition)}</span>
               <span class="category-pill-mini">${escapeHtml(item.category)}</span>
@@ -328,10 +339,11 @@ async function openItemDetail(itemId) {
         <div>
           <div>Publicado por <strong>${escapeHtml(item.ownerName)}</strong></div>
           <div class="reputation-line">
-            <span class="stars">★★★★★</span>
-            <strong>${(item.ownerRating ?? 5).toFixed(1)}</strong>
+            <span>♻️ <strong>${item.ownerCompletedTrades || 0}</strong> trueques realizados</span>
             <span class="rep-sep">·</span>
-            <span>${item.ownerCompletedTrades || 0} trueques completados</span>
+            <span>⭐ <strong>${(item.ownerRating ?? 5).toFixed(1)}</strong></span>
+            <span class="rep-sep">·</span>
+            <span>📅 ${formatRelativeDate(item.createdAt)}</span>
           </div>
           ${badgesHtml ? `<div class="badges-row">${badgesHtml}</div>` : ''}
         </div>
