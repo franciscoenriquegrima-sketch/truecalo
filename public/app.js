@@ -286,18 +286,7 @@ function renderSkeletons(count = 6) {
   const grid = $('#itemsGrid');
   $('#emptyState').classList.add('hidden');
   grid.innerHTML = Array.from({ length: count })
-    .map(
-      () => `
-      <div class="card card-skeleton" aria-hidden="true">
-        <div class="skeleton-media skeleton-pulse"></div>
-        <div class="card-body">
-          <div class="skeleton-line skeleton-pulse" style="width:72%;height:18px"></div>
-          <div class="skeleton-line skeleton-pulse" style="width:48%;height:14px"></div>
-          <div class="skeleton-line skeleton-pulse" style="width:100%;height:52px;margin-top:6px"></div>
-        </div>
-      </div>
-    `
-    )
+    .map(() => `<div class="card-skeleton skeleton-pulse" aria-hidden="true"></div>`)
     .join('');
 }
 
