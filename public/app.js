@@ -304,9 +304,22 @@ function renderSkeletons(count = 6) {
 function getCardThumbUrl(item) {
   if (item.thumbImageUrl) return item.thumbImageUrl;
   if (item.imageUrl && item.imageUrl.includes('images.unsplash.com')) {
-    return item.imageUrl.replace(/w=\d+/, 'w=600').replace(/q=\d+/, 'q=75');
+    return item.imageUrl.replace(/w=\d+/, 'w=800').replace(/q=\d+/, 'q=75');
   }
   return item.imageUrl || '';
+}
+
+function getCardSrcSet(item) {
+  if (item.thumbImageUrl && item.imageUrl) {
+    return `${item.thumbImageUrl} 600w, ${item.imageUrl} 1200w`;
+  }
+  if (item.imageUrl && item.imageUrl.includes('images.unsplash.com')) {
+    const u400 = item.imageUrl.replace(/w=\d+/, 'w=400').replace(/q=\d+/, 'q=70');
+    const u800 = item.imageUrl.replace(/w=\d+/, 'w=800').replace(/q=\d+/, 'q=75');
+    const u1200 = item.imageUrl.replace(/w=\d+/, 'w=1200').replace(/q=\d+/, 'q=80');
+    return `${u400} 400w, ${u800} 800w, ${u1200} 1200w`;
+  }
+  return '';
 }
 
 function getBlurPlaceholder(item) {
@@ -335,11 +348,15 @@ function renderItems() {
       const typeClass = item.type === 'regalo' ? 'tag-regalo' : 'tag-trueque';
       const blurSrc = getBlurPlaceholder(item);
       const cardSrc = getCardThumbUrl(item);
+      const cardSrcSet = getCardSrcSet(item);
+      const srcsetAttr = cardSrcSet
+        ? `srcset="${escapeHtml(cardSrcSet)}" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"`
+        : '';
       const priorityAttrs = idx === 0
         ? 'fetchpriority="high" decoding="async"'
         : 'loading="lazy" decoding="async" fetchpriority="low"';
       const media = cardSrc
-        ? `${blurSrc ? `<img class="card-blur-img" src="${escapeHtml(blurSrc)}" alt="" aria-hidden="true" />` : '<div class="card-blur-overlay"></div>'}<img class="card-full-img" src="${escapeHtml(cardSrc)}" alt="Imagen de ${escapeHtml(item.title)}" ${priorityAttrs} onload="this.parentElement.classList.add('is-loaded')" onerror="this.parentElement.classList.add('is-loaded');this.outerHTML='<div class=\\'card-placeholder\\'>📦</div>'" />`
+        ? `${blurSrc ? `<img class="card-blur-img" src="${escapeHtml(blurSrc)}" alt="" aria-hidden="true" />` : '<div class="card-blur-overlay"></div>'}<img class="card-full-img" src="${escapeHtml(cardSrc)}" ${srcsetAttr} alt="Imagen de ${escapeHtml(item.title)}" ${priorityAttrs} onload="this.parentElement.classList.add('is-loaded')" onerror="this.parentElement.classList.add('is-loaded');this.outerHTML='<div class=\\'card-placeholder\\'>📦</div>'" />`
         : `<div class="card-placeholder">📦</div>`;
 
       return `
