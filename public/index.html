@@ -79,18 +79,22 @@
       </div>
 
       <div class="nav-actions">
-        <a href="/juegos" class="btn btn-outline">🎮 Minijuegos</a>
-        <a href="/registro" class="btn btn-outline">Hazte miembro · 20 €</a>
-        <button class="btn btn-primary" id="btnOpenPublish">+ Publicar objeto</button>
-        <button class="btn btn-outline" id="btnOpenTrades">
-          Mis trueques <span class="badge hidden" id="tradesBadge">0</span>
-        </button>
+        <button class="btn btn-primary" id="btnOpenPublish">+ Publicar</button>
         <button class="user-pill" id="btnOpenProfile" title="Cambiar o editar perfil">
           <span class="avatar" id="navAvatar">?</span>
-          <span class="user-name" id="navUserName">Usuario</span>
+          <span class="user-name" id="navUserName">👤 Perfil</span>
         </button>
       </div>
     </div>
+    <nav class="main-nav container" aria-label="Navegación principal">
+      <a href="#" class="nav-link active" id="navInicio">🏠 Inicio</a>
+      <a href="#catalogo" class="nav-link" id="navExplorar">🔍 Explorar</a>
+      <button type="button" class="nav-link" id="btnOpenTrades">🔄 Mis Trueques <span class="badge hidden" id="tradesBadge">0</span></button>
+      <a href="#catalogo" class="nav-link" id="navRegalos">🎁 Regalos</a>
+      <a href="/juegos" class="nav-link">🎮 Minijuegos</a>
+      <a href="/registro" class="nav-link nav-link-premium">⭐ Premium</a>
+      <button type="button" class="nav-link" id="navPerfil">👤 Perfil</button>
+    </nav>
   </header>
 
   <main>

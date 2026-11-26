@@ -757,6 +757,24 @@ function bindEvents() {
 
   // Profile modal
   $('#btnOpenProfile').addEventListener('click', () => openModal('profileModal'));
+  $('#navPerfil')?.addEventListener('click', () => openModal('profileModal'));
+
+  $('#navInicio')?.addEventListener('click', e => {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  $('#navExplorar')?.addEventListener('click', () => {
+    state.filters.type = 'todos';
+    $('#typeFilter').value = 'todos';
+    loadItems();
+  });
+
+  $('#navRegalos')?.addEventListener('click', () => {
+    state.filters.type = 'regalo';
+    $('#typeFilter').value = 'regalo';
+    loadItems();
+  });
 
   $('#userSwitcher').addEventListener('change', async e => {
     const found = state.users.find(u => u.id === e.target.value);
