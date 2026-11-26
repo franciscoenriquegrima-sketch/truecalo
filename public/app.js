@@ -356,7 +356,7 @@ function renderItems() {
         ? 'fetchpriority="high" decoding="async"'
         : 'loading="lazy" decoding="async" fetchpriority="low"';
       const media = cardSrc
-        ? `${blurSrc ? `<img class="card-blur-img" src="${escapeHtml(blurSrc)}" alt="" aria-hidden="true" />` : '<div class="card-blur-overlay"></div>'}<img class="card-full-img" src="${escapeHtml(cardSrc)}" ${srcsetAttr} alt="Imagen de ${escapeHtml(item.title)}" ${priorityAttrs} onload="this.parentElement.classList.add('is-loaded')" onerror="this.parentElement.classList.add('is-loaded');this.outerHTML='<div class=\\'card-placeholder\\'>📦</div>'" />`
+        ? `${blurSrc ? `<img class="card-blur-img" src="${escapeHtml(blurSrc)}" width="600" height="450" alt="" aria-hidden="true" />` : '<div class="card-blur-overlay"></div>'}<img class="card-full-img" src="${escapeHtml(cardSrc)}" ${srcsetAttr} width="600" height="450" alt="Imagen de ${escapeHtml(item.title)}" ${priorityAttrs} onload="this.parentElement.classList.add('is-loaded')" onerror="this.parentElement.classList.add('is-loaded');this.outerHTML='<div class=\\'card-placeholder\\'>📦</div>'" />`
         : `<div class="card-placeholder">📦</div>`;
 
       return `
@@ -567,7 +567,7 @@ async function openItemDetail(itemId) {
             .map(
               (src, i) => `
             <div class="detail-slide detail-zoom-wrap" data-slide="${i}" title="Pellizca, arrastra o haz doble clic para ampliar">
-              <img class="detail-img" src="${escapeHtml(src)}" alt="${escapeHtml(item.title)} (${i + 1})" ${i > 0 ? 'loading="lazy"' : ''} decoding="async" draggable="false" onerror="this.outerHTML='<div class=\\'detail-img card-placeholder\\'>📦</div>'" />
+              <img class="detail-img" src="${escapeHtml(src)}" width="1200" height="900" alt="${escapeHtml(item.title)} (${i + 1})" ${i > 0 ? 'loading="lazy"' : ''} decoding="async" draggable="false" onerror="this.outerHTML='<div class=\\'detail-img card-placeholder\\'>📦</div>'" />
               <span class="zoom-level-badge">🔍 Pellizca o doble toque</span>
             </div>
           `
