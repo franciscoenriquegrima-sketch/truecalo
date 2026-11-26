@@ -13,6 +13,7 @@ const state = {
   },
   activeTab: 'received',
   uploadedImageDataUrl: '',
+  uploadedImages: [],
   uploadedThumbDataUrl: '',
   uploadedBlurDataUrl: ''
 };
@@ -488,8 +489,36 @@ async function openItemDetail(itemId) {
     );
   }
 
-  const mediaHtml = item.imageUrl
-    ? `<div class="detail-zoom-wrap" id="detailZoomWrap" title="Pellizca, arrastra o haz doble clic para ampliar"><img class="detail-img" src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.title)}" decoding="async" draggable="false" onerror="this.outerHTML='<div class=\\'detail-img card-placeholder\\'>📦</div>'" /><span class="zoom-level-badge">🔍 Pellizca o doble toque</span></div>`
+  const gallery = Array.isArray(item.images) && item.images.length
+    ? item.images
+    : item.imageUrl
+      ? [item.imageUrl]
+      : [];
+
+  const mediaHtml = gallery.length
+    ? `
+      <div class="detail-gallery-wrap">
+        <div class="detail-gallery" id="detailGallery">
+          ${gallery
+            .map(
+              (src, i) => `
+            <div class="detail-slide detail-zoom-wrap" data-slide="${i}" title="Pellizca, arrastra o haz doble clic para ampliar">
+              <img class="detail-img" src="${escapeHtml(src)}" alt="${escapeHtml(item.title)} (${i + 1})" decoding="async" draggable="false" onerror="this.outerHTML='<div class=\\'detail-img card-placeholder\\'>📦</div>'" />
+              <span class="zoom-level-badge">🔍 Pellizca o doble toque</span>
+            </div>
+          `
+            )
+            .join('')}
+        </div>
+        ${
+          gallery.length > 1
+            ? `<div class="gallery-dots" id="galleryDots">${gallery
+                .map((_, i) => `<button type="button" class="gallery-dot ${i === 0 ? 'active' : ''}" data-dot="${i}" aria-label="Foto ${i + 1}"></button>`)
+                .join('')}</div>`
+            : ''
+        }
+      </div>
+    `
     : `<div class="detail-img card-placeholder">📦</div>`;
 
   let actionHtml = '';
@@ -598,10 +627,23 @@ async function openItemDetail(itemId) {
     </div>
   `;
 
-  const zoomWrap = $('#detailZoomWrap');
-  const zoomImg = zoomWrap?.querySelector('.detail-img');
-  if (zoomWrap && zoomImg) {
-    attachPanPinchZoom(zoomWrap, zoomImg);
+  $$('#detailGallery .detail-zoom-wrap').forEach(zoomWrap => {
+    const zoomImg = zoomWrap.querySelector('.detail-img');
+    if (zoomImg) attachPanPinchZoom(zoomWrap, zoomImg);
+  });
+
+  const galleryEl = $('#detailGallery');
+  if (galleryEl) {
+    $('#galleryDots')?.addEventListener('click', e => {
+      const dot = e.target.closest('.gallery-dot');
+      if (!dot) return;
+      const idx = Number(dot.dataset.dot);
+      galleryEl.scrollTo({ left: idx * galleryEl.clientWidth, behavior: 'smooth' });
+    });
+    galleryEl.addEventListener('scroll', () => {
+      const idx = Math.round(galleryEl.scrollLeft / Math.max(1, galleryEl.clientWidth));
+      $$('#galleryDots .gallery-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+    });
   }
 
   if (isMine && isAvailable) {
@@ -659,6 +701,7 @@ async function openItemDetail(itemId) {
 
 function openPublishModal(itemToEdit = null) {
   state.uploadedImageDataUrl = '';
+  state.uploadedImages = [];
   state.uploadedThumbDataUrl = '';
   state.uploadedBlurDataUrl = '';
   $('#imageFileHint').textContent = '600×450 / 1200×900 px · Máx. 300 KB · WebP/AVIF';
@@ -940,34 +983,45 @@ function bindEvents() {
     };
   }
 
-  $('#itemImageFile').addEventListener('change', e => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const img = new Image();
-      img.onload = () => {
-        const maxBytes = 300 * 1024;
-        const detail = encodeWithinLimit(img, 1200, 900, maxBytes);
-        if (detail.bytes > maxBytes) {
-          showToast('La imagen supera los 300 KB incluso tras optimizarla. Elige otra más ligera.', true);
-          return;
-        }
-        const thumb = encodeWithinLimit(img, 600, 450, 120 * 1024);
-        const blur = encodeWithinLimit(img, 32, 24, 15 * 1024);
+  $('#itemImageFile').addEventListener('change', async e => {
+    const files = Array.from(e.target.files || []).slice(0, 6);
+    if (!files.length) return;
+    const maxBytes = 300 * 1024;
+    const encodedList = [];
+    let firstThumb = '';
+    let firstBlur = '';
 
-        state.uploadedImageDataUrl = detail.dataUrl;
-        state.uploadedThumbDataUrl = thumb.dataUrl;
-        state.uploadedBlurDataUrl = blur.dataUrl;
+    for (let i = 0; i < files.length; i++) {
+      const dataUrl = await new Promise(resolve => {
+        const r = new FileReader();
+        r.onload = () => resolve(r.result);
+        r.readAsDataURL(files[i]);
+      });
+      const img = await new Promise(resolve => {
+        const im = new Image();
+        im.onload = () => resolve(im);
+        im.src = dataUrl;
+      });
+      const detail = encodeWithinLimit(img, 1200, 900, maxBytes);
+      if (detail.bytes > maxBytes) {
+        showToast(`La imagen "${files[i].name}" supera 300 KB tras optimizarla.`, true);
+        continue;
+      }
+      encodedList.push(detail.dataUrl);
+      if (i === 0) {
+        firstThumb = encodeWithinLimit(img, 600, 450, 120 * 1024).dataUrl;
+        firstBlur = encodeWithinLimit(img, 32, 24, 15 * 1024).dataUrl;
+      }
+    }
 
-        const kb = Math.round(detail.bytes / 1024);
-        $('#imageFileHint').textContent = `${detail.width}×${detail.height} ${detail.format} (${kb} KB) + miniatura 600×450`;
-        $('#imagePreview').src = detail.dataUrl;
-        $('#imagePreview').classList.remove('hidden');
-      };
-      img.src = reader.result;
-    };
-    reader.readAsDataURL(file);
+    if (!encodedList.length) return;
+    state.uploadedImages = encodedList;
+    state.uploadedImageDataUrl = encodedList[0];
+    state.uploadedThumbDataUrl = firstThumb;
+    state.uploadedBlurDataUrl = firstBlur;
+    $('#imageFileHint').textContent = `${encodedList.length} foto(s) optimizada(s) en WebP/AVIF`;
+    $('#imagePreview').src = encodedList[0];
+    $('#imagePreview').classList.remove('hidden');
   });
 
   $('#publishForm').addEventListener('submit', async e => {
@@ -984,6 +1038,9 @@ function bindEvents() {
       lookingFor: $('#itemLookingFor').value,
       description: $('#itemDescription').value,
       imageUrl: state.uploadedImageDataUrl || $('#itemImageUrl').value.trim(),
+      images: state.uploadedImages.length
+        ? state.uploadedImages
+        : ($('#itemImageUrl').value.trim() ? [$('#itemImageUrl').value.trim()] : []),
       thumbImageUrl: state.uploadedThumbDataUrl || '',
       blurImageUrl: state.uploadedBlurDataUrl || ''
     };

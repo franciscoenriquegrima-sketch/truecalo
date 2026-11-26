@@ -427,11 +427,17 @@ app.get('/api/items', (req, res) => {
 });
 
 app.post('/api/items', (req, res) => {
-  const { ownerId, title, description, category, condition, type, lookingFor, location, imageUrl, thumbImageUrl, blurImageUrl } = req.body || {};
+  const { ownerId, title, description, category, condition, type, lookingFor, location, imageUrl, images, thumbImageUrl, blurImageUrl } = req.body || {};
   if (!ownerId || !title || !title.trim() || !description || !description.trim()) {
     return res.status(400).json({ error: 'Faltan campos obligatorios (título, descripción y usuario).' });
   }
-  const cleanImg = (imageUrl || '').trim();
+  const cleanImages = Array.isArray(images)
+    ? images.map(u => String(u || '').trim()).filter(Boolean).slice(0, 6)
+    : [];
+  if (cleanImages.some(u => !isSafeImageUrl(u))) {
+    return res.status(400).json({ error: 'Una o más URLs de imagen no son válidas.' });
+  }
+  const cleanImg = (imageUrl || cleanImages[0] || '').trim();
   const cleanThumb = (thumbImageUrl || '').trim();
   const cleanBlur = (blurImageUrl || '').trim();
   if (!isSafeImageUrl(cleanImg) || !isSafeImageUrl(cleanThumb) || !isSafeImageUrl(cleanBlur)) {
@@ -456,6 +462,7 @@ app.post('/api/items', (req, res) => {
       : clampStr(lookingFor || 'Abierto a propuestas interesantes', 200),
     location: clampStr(location || owner.city || 'Sin ubicación', 100),
     imageUrl: cleanImg,
+    images: cleanImages.length ? cleanImages : (cleanImg ? [cleanImg] : []),
     thumbImageUrl: cleanThumb,
     blurImageUrl: cleanBlur,
     status: 'disponible',
@@ -477,7 +484,7 @@ app.put('/api/items/:id', (req, res) => {
   const item = db.items.find(i => i.id === req.params.id);
   if (!item) return res.status(404).json({ error: 'Objeto no encontrado.' });
 
-  const { userId, title, description, category, condition, type, lookingFor, location, imageUrl, thumbImageUrl, blurImageUrl, status } = req.body || {};
+  const { userId, title, description, category, condition, type, lookingFor, location, imageUrl, images, thumbImageUrl, blurImageUrl, status } = req.body || {};
   if (!userId || item.ownerId !== userId) {
     return res.status(403).json({ error: 'No tienes permiso para editar este objeto.' });
   }
@@ -489,6 +496,14 @@ app.put('/api/items/:id', (req, res) => {
   if (type === 'trueque' || type === 'regalo') item.type = type;
   if (typeof lookingFor === 'string') item.lookingFor = clampStr(lookingFor, 200);
   if (typeof location === 'string') item.location = clampStr(location, 100);
+  if (Array.isArray(images)) {
+    const cleanImages = images.map(u => String(u || '').trim()).filter(Boolean).slice(0, 6);
+    if (cleanImages.some(u => !isSafeImageUrl(u))) {
+      return res.status(400).json({ error: 'Una o más URLs de imagen no son válidas.' });
+    }
+    item.images = cleanImages;
+    if (cleanImages[0]) item.imageUrl = cleanImages[0];
+  }
   if (typeof imageUrl === 'string') {
     const cleanImg = imageUrl.trim();
     if (!isSafeImageUrl(cleanImg)) {

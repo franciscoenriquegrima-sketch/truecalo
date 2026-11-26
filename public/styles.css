@@ -953,6 +953,52 @@ textarea {
   gap: 24px;
 }
 
+.detail-gallery-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.detail-gallery {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  border-radius: 22px;
+  scrollbar-width: none;
+}
+
+.detail-gallery::-webkit-scrollbar {
+  display: none;
+}
+
+.detail-slide {
+  width: 100%;
+  flex: 0 0 100%;
+  scroll-snap-align: center;
+}
+
+.gallery-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.gallery-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  border: none;
+  padding: 0;
+  background: var(--border);
+  cursor: pointer;
+  transition: width 0.2s ease, background 0.2s ease;
+}
+
+.gallery-dot.active {
+  width: 22px;
+  background: var(--primary);
+}
+
 .detail-zoom-wrap {
   position: relative;
   overflow: hidden;
