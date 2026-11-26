@@ -281,7 +281,7 @@ function renderItems() {
       const typeClass = item.type === 'regalo' ? 'tag-regalo' : 'tag-trueque';
       const blurSrc = getBlurPlaceholder(item);
       const media = item.imageUrl
-        ? `${blurSrc ? `<img class="card-blur-img" src="${escapeHtml(blurSrc)}" alt="" aria-hidden="true" />` : '<div class="card-blur-overlay"></div>'}<img class="card-full-img" src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.title)}" loading="lazy" decoding="async" onload="this.parentElement.classList.add('is-loaded')" onerror="this.parentElement.classList.add('is-loaded');this.outerHTML='<div class=\\'card-placeholder\\'>📦</div>'" />`
+        ? `${blurSrc ? `<img class="card-blur-img" src="${escapeHtml(blurSrc)}" alt="" aria-hidden="true" />` : '<div class="card-blur-overlay"></div>'}<img class="card-full-img" src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.title)}" loading="lazy" decoding="async" fetchpriority="low" onload="this.parentElement.classList.add('is-loaded')" onerror="this.parentElement.classList.add('is-loaded');this.outerHTML='<div class=\\'card-placeholder\\'>📦</div>'" />`
         : `<div class="card-placeholder">📦</div>`;
 
       return `
