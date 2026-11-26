@@ -988,9 +988,50 @@ function bindEvents() {
 
   // Search & filters
   let searchTimer;
+  function renderHeroSuggestions(val) {
+    const box = $('#heroSearchSuggestions');
+    const clearBtn = $('#btnClearHeroSearch');
+    if (clearBtn) clearBtn.classList.toggle('hidden', !val.trim());
+    if (!box) return;
+
+    const term = val.trim().toLowerCase();
+    if (!term) {
+      box.classList.add('hidden');
+      box.innerHTML = '';
+      return;
+    }
+
+    const matches = state.items
+      .filter(
+        i =>
+          i.title.toLowerCase().includes(term) ||
+          i.location.toLowerCase().includes(term) ||
+          i.category.toLowerCase().includes(term)
+      )
+      .slice(0, 5);
+
+    if (!matches.length) {
+      box.classList.add('hidden');
+      return;
+    }
+
+    box.innerHTML = matches
+      .map(
+        i => `
+        <button type="button" class="suggestion-row" data-suggest-id="${i.id}">
+          <span><strong>${escapeHtml(i.title)}</strong></span>
+          <span class="suggestion-meta">📍 ${escapeHtml(i.location)}</span>
+        </button>
+      `
+      )
+      .join('');
+    box.classList.remove('hidden');
+  }
+
   function handleSearchInput(val) {
     $('#searchInput').value = val;
     $('#heroSearchInput').value = val;
+    renderHeroSuggestions(val);
     clearTimeout(searchTimer);
     searchTimer = setTimeout(() => {
       state.filters.q = val;
@@ -1003,12 +1044,29 @@ function bindEvents() {
   $('#heroSearchInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') {
       e.preventDefault();
+      $('#heroSearchSuggestions')?.classList.add('hidden');
       document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth' });
     }
   });
   $('#btnHeroSearch').addEventListener('click', () => {
+    $('#heroSearchSuggestions')?.classList.add('hidden');
     handleSearchInput($('#heroSearchInput').value);
     document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth' });
+  });
+  $('#btnClearHeroSearch')?.addEventListener('click', () => {
+    handleSearchInput('');
+    $('#heroSearchInput').focus();
+  });
+  $('#heroSearchSuggestions')?.addEventListener('click', e => {
+    const row = e.target.closest('[data-suggest-id]');
+    if (!row) return;
+    $('#heroSearchSuggestions').classList.add('hidden');
+    openItemDetail(row.dataset.suggestId);
+  });
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.hero-search-wrap')) {
+      $('#heroSearchSuggestions')?.classList.add('hidden');
+    }
   });
 
   $('#heroQuickTags')?.addEventListener('click', e => {

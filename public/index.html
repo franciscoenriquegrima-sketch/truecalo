@@ -11,6 +11,7 @@
   <meta name="google-adsense-account" content="ca-pub-0000000000000000" />
   <link rel="canonical" href="http://localhost:3000/" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preload" as="image" href="/logo.svg" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
@@ -95,10 +96,14 @@
           <p class="hero-subtitle">Intercambia objetos, encuentra lo que necesitas y da una segunda vida a miles de artículos.</p>
 
           <label for="heroSearchInput" class="hero-search-label">🔍 ¿Qué buscas hoy?</label>
-          <div class="hero-search-box">
-            <span class="hero-search-icon" aria-hidden="true">🔍</span>
-            <input type="search" id="heroSearchInput" placeholder="Buscar bicicleta, guitarra, libros, Madrid..." aria-label="Buscar artículos o ciudades" />
-            <button type="button" class="btn btn-primary btn-hero-search" id="btnHeroSearch">Buscar</button>
+          <div class="hero-search-wrap">
+            <div class="hero-search-box">
+              <span class="hero-search-icon" aria-hidden="true">🔍</span>
+              <input type="search" id="heroSearchInput" placeholder="Buscar bicicleta, guitarra, libros, Calatayud..." aria-label="Buscar artículos o ciudades" autocomplete="off" />
+              <button type="button" class="btn-clear-search hidden" id="btnClearHeroSearch" aria-label="Limpiar búsqueda">✕</button>
+              <button type="button" class="btn btn-primary btn-hero-search" id="btnHeroSearch">Buscar</button>
+            </div>
+            <div class="hero-suggestions hidden" id="heroSearchSuggestions" role="listbox" aria-label="Sugerencias de búsqueda"></div>
           </div>
           <div class="hero-quick-tags" id="heroQuickTags" aria-label="Búsquedas populares">
             <span>Populares:</span>
