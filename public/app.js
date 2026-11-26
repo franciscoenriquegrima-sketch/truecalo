@@ -12,7 +12,8 @@ const state = {
     nearMe: false
   },
   activeTab: 'received',
-  uploadedImageDataUrl: ''
+  uploadedImageDataUrl: '',
+  uploadedBlurDataUrl: ''
 };
 
 // Helpers
@@ -254,6 +255,14 @@ function renderSkeletons(count = 6) {
     .join('');
 }
 
+function getBlurPlaceholder(item) {
+  if (item.blurImageUrl) return item.blurImageUrl;
+  if (item.imageUrl && item.imageUrl.includes('images.unsplash.com')) {
+    return item.imageUrl.replace(/w=\d+/, 'w=40').replace(/q=\d+/, 'q=10');
+  }
+  return '';
+}
+
 function renderItems() {
   const grid = $('#itemsGrid');
   const empty = $('#emptyState');
@@ -270,8 +279,9 @@ function renderItems() {
       const isDone = item.status === 'intercambiado';
       const typeLabel = item.type === 'regalo' ? '🎁 REGALO' : '🔄 TRUEQUE';
       const typeClass = item.type === 'regalo' ? 'tag-regalo' : 'tag-trueque';
+      const blurSrc = getBlurPlaceholder(item);
       const media = item.imageUrl
-        ? `<div class="card-blur-overlay"></div><img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.title)}" loading="lazy" decoding="async" onload="this.parentElement.classList.add('is-loaded')" onerror="this.parentElement.classList.add('is-loaded');this.outerHTML='<div class=\\'card-placeholder\\'>📦</div>'" />`
+        ? `${blurSrc ? `<img class="card-blur-img" src="${escapeHtml(blurSrc)}" alt="" aria-hidden="true" />` : '<div class="card-blur-overlay"></div>'}<img class="card-full-img" src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.title)}" loading="lazy" decoding="async" onload="this.parentElement.classList.add('is-loaded')" onerror="this.parentElement.classList.add('is-loaded');this.outerHTML='<div class=\\'card-placeholder\\'>📦</div>'" />`
         : `<div class="card-placeholder">📦</div>`;
 
       return `
@@ -509,7 +519,8 @@ async function openItemDetail(itemId) {
 
 function openPublishModal(itemToEdit = null) {
   state.uploadedImageDataUrl = '';
-  $('#imageFileHint').textContent = 'Sin archivo seleccionado';
+  state.uploadedBlurDataUrl = '';
+  $('#imageFileHint').textContent = '1200×900 px · Máx. 1 MB · Formato WebP';
   $('#itemImageFile').value = '';
 
   if (itemToEdit) {
@@ -791,6 +802,13 @@ function bindEvents() {
         }
 
         const kb = Math.round(finalBytes / 1024);
+        // Generate tiny 32x24 LQIP blur placeholder
+        const blurCanvas = document.createElement('canvas');
+        blurCanvas.width = 32;
+        blurCanvas.height = 24;
+        blurCanvas.getContext('2d').drawImage(img, 0, 0, 32, 24);
+        state.uploadedBlurDataUrl = blurCanvas.toDataURL('image/webp', 0.35);
+
         state.uploadedImageDataUrl = compressed;
         $('#imageFileHint').textContent = `${canvas.width}×${canvas.height} WebP (${kb} KB)`;
         $('#imagePreview').src = compressed;
@@ -814,7 +832,8 @@ function bindEvents() {
       location: $('#itemLocation').value,
       lookingFor: $('#itemLookingFor').value,
       description: $('#itemDescription').value,
-      imageUrl: state.uploadedImageDataUrl || $('#itemImageUrl').value.trim()
+      imageUrl: state.uploadedImageDataUrl || $('#itemImageUrl').value.trim(),
+      blurImageUrl: state.uploadedBlurDataUrl || ''
     };
 
     try {

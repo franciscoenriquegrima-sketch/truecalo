@@ -427,12 +427,13 @@ app.get('/api/items', (req, res) => {
 });
 
 app.post('/api/items', (req, res) => {
-  const { ownerId, title, description, category, condition, type, lookingFor, location, imageUrl } = req.body || {};
+  const { ownerId, title, description, category, condition, type, lookingFor, location, imageUrl, blurImageUrl } = req.body || {};
   if (!ownerId || !title || !title.trim() || !description || !description.trim()) {
     return res.status(400).json({ error: 'Faltan campos obligatorios (título, descripción y usuario).' });
   }
   const cleanImg = (imageUrl || '').trim();
-  if (!isSafeImageUrl(cleanImg)) {
+  const cleanBlur = (blurImageUrl || '').trim();
+  if (!isSafeImageUrl(cleanImg) || !isSafeImageUrl(cleanBlur)) {
     return res.status(400).json({ error: 'La URL de la imagen no es válida.' });
   }
 
@@ -454,6 +455,7 @@ app.post('/api/items', (req, res) => {
       : clampStr(lookingFor || 'Abierto a propuestas interesantes', 200),
     location: clampStr(location || owner.city || 'Sin ubicación', 100),
     imageUrl: cleanImg,
+    blurImageUrl: cleanBlur,
     status: 'disponible',
     createdAt: new Date().toISOString()
   };
@@ -473,7 +475,7 @@ app.put('/api/items/:id', (req, res) => {
   const item = db.items.find(i => i.id === req.params.id);
   if (!item) return res.status(404).json({ error: 'Objeto no encontrado.' });
 
-  const { userId, title, description, category, condition, type, lookingFor, location, imageUrl, status } = req.body || {};
+  const { userId, title, description, category, condition, type, lookingFor, location, imageUrl, blurImageUrl, status } = req.body || {};
   if (!userId || item.ownerId !== userId) {
     return res.status(403).json({ error: 'No tienes permiso para editar este objeto.' });
   }
@@ -491,6 +493,13 @@ app.put('/api/items/:id', (req, res) => {
       return res.status(400).json({ error: 'La URL de la imagen no es válida.' });
     }
     item.imageUrl = cleanImg;
+  }
+  if (typeof blurImageUrl === 'string') {
+    const cleanBlur = blurImageUrl.trim();
+    if (!isSafeImageUrl(cleanBlur)) {
+      return res.status(400).json({ error: 'La URL de vista previa no es válida.' });
+    }
+    item.blurImageUrl = cleanBlur;
   }
   if (status === 'disponible' || status === 'intercambiado') item.status = status;
 
