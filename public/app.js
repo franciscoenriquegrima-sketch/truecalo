@@ -281,8 +281,14 @@ function renderItems() {
               if (!match) return '';
               return `
                 <div class="match-banner">
-                  <strong>🤖 Coincidencia: ${match.score}%</strong>
-                  <span>Tu ${escapeHtml(match.myItem.title)} encaja con este trueque</span>
+                  <div class="match-top">
+                    <span>🤖 Coincidencia</span>
+                    <strong>${match.score}%</strong>
+                  </div>
+                  <div class="match-track">
+                    <div class="match-fill" style="width:${match.score}%"></div>
+                  </div>
+                  <span class="match-sub">Tu ${escapeHtml(match.myItem.title)} encaja con este trueque</span>
                 </div>
               `;
             })()}
@@ -350,8 +356,14 @@ async function openItemDetail(itemId) {
     const matchHtml = bestMatch
       ? `
         <div class="match-banner">
-          <strong>🤖 Coincidencia: ${bestMatch.score}%</strong>
-          <span>Tu ${escapeHtml(bestMatch.myItem.title)} encaja con este trueque</span>
+          <div class="match-top">
+            <span>🤖 Coincidencia</span>
+            <strong>${bestMatch.score}%</strong>
+          </div>
+          <div class="match-track">
+            <div class="match-fill" style="width:${bestMatch.score}%"></div>
+          </div>
+          <span class="match-sub">Tu ${escapeHtml(bestMatch.myItem.title)} encaja con este trueque</span>
         </div>
       `
       : '';
