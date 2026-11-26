@@ -368,7 +368,7 @@ async function openItemDetail(itemId) {
   }
 
   const mediaHtml = item.imageUrl
-    ? `<img class="detail-img" src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.title)}" decoding="async" onerror="this.outerHTML='<div class=\\'detail-img card-placeholder\\'>📦</div>'" />`
+    ? `<div class="detail-zoom-wrap" id="detailZoomWrap" title="Toca o haz clic para ampliar"><img class="detail-img" src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.title)}" decoding="async" onerror="this.outerHTML='<div class=\\'detail-img card-placeholder\\'>📦</div>'" /></div>`
     : `<div class="detail-img card-placeholder">📦</div>`;
 
   let actionHtml = '';
@@ -476,6 +476,20 @@ async function openItemDetail(itemId) {
       ${actionHtml}
     </div>
   `;
+
+  $('#detailZoomWrap')?.addEventListener('click', e => {
+    const wrap = e.currentTarget;
+    const img = wrap.querySelector('.detail-img');
+    if (!img) return;
+    const willZoom = !wrap.classList.contains('is-zoomed');
+    if (willZoom) {
+      const rect = wrap.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      img.style.transformOrigin = `${x}% ${y}%`;
+    }
+    wrap.classList.toggle('is-zoomed', willZoom);
+  });
 
   if (isMine && isAvailable) {
     $('#btnEditThisItem')?.addEventListener('click', () => {
