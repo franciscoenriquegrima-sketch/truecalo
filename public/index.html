@@ -394,33 +394,16 @@
     <div class="modal">
       <button class="modal-close" data-close="a11yModal" aria-label="Cerrar">✕</button>
       <h2 id="a11yModalTitle">♿ Opciones de accesibilidad</h2>
-      <p class="modal-subtitle">Adapta TRUECALO a tus necesidades visuales o de lectura.</p>
-      <div class="form-stack">
-        <label class="cookie-option cookie-toggle-row">
-          <div>
-            <strong>Texto más grande</strong>
-            <p class="cookie-opt-desc">Aumenta el tamaño general de la tipografía para leer con mayor comodidad.</p>
-          </div>
-          <input type="checkbox" id="a11yLargeText" />
-        </label>
-        <label class="cookie-option cookie-toggle-row">
-          <div>
-            <strong>Alto contraste</strong>
-            <p class="cookie-opt-desc">Refuerza bordes y contraste entre textos y fondos.</p>
-          </div>
-          <input type="checkbox" id="a11yHighContrast" />
-        </label>
-        <label class="cookie-option cookie-toggle-row">
-          <div>
-            <strong>Reducir animaciones</strong>
-            <p class="cookie-opt-desc">Desactiva transiciones y efectos de movimiento en toda la web.</p>
-          </div>
-          <input type="checkbox" id="a11yReducedMotion" />
-        </label>
-        <div class="form-actions">
-          <button type="button" class="btn btn-outline" id="btnA11yReset">Restablecer</button>
-          <button type="button" class="btn btn-primary" data-close="a11yModal">Listo</button>
-        </div>
+      <p class="modal-subtitle">Adapta TRUECALO a tus necesidades visuales, auditivas o de lectura.</p>
+      <div class="a11y-menu-stack">
+        <button type="button" class="a11y-menu-btn" id="btnA11yLargeText">🔍 Aumentar texto</button>
+        <button type="button" class="a11y-menu-btn" id="btnA11yHighContrast">🎨 Alto contraste</button>
+        <button type="button" class="a11y-menu-btn" id="btnA11ySpeech">🔊 Lectura de texto</button>
+        <button type="button" class="a11y-menu-btn" id="btnA11yReducedMotion">⏸ Reducir animaciones</button>
+      </div>
+      <div class="form-actions" style="margin-top:16px">
+        <button type="button" class="btn btn-outline" id="btnA11yReset">Restablecer</button>
+        <button type="button" class="btn btn-primary" data-close="a11yModal">Listo</button>
       </div>
     </div>
   </div>

@@ -1748,17 +1748,78 @@ textarea {
   filter: brightness(1.05);
 }
 
+.a11y-menu-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.a11y-menu-btn {
+  width: 100%;
+  text-align: left;
+  padding: 13px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.96rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.a11y-menu-btn:hover {
+  border-color: #00B8FF;
+}
+
+.a11y-menu-btn.active {
+  background: rgba(0, 184, 255, 0.14);
+  border-color: #00B8FF;
+  color: #0369a1;
+}
+
+.a11y-menu-btn.active::after {
+  content: 'Activo ✓';
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
 html.a11y-large-text {
   font-size: 18px;
 }
 
-html.a11y-high-contrast {
-  --bg: #ffffff;
-  --surface: #ffffff;
-  --surface-alt: #f1f5f9;
-  --text: #000000;
-  --muted: #1f2937;
-  --border: #475569;
+html.a11y-high-contrast,
+html.a11y-high-contrast body {
+  background: #000000;
+  color: #ffffff;
+  --bg: #000000;
+  --surface: #0a0a0a;
+  --surface-alt: #18181b;
+  --text: #ffffff;
+  --muted: #e5e7eb;
+  --border: #ffffff;
+}
+
+html.a11y-high-contrast .navbar {
+  background: #000000;
+  border-bottom: 2px solid #ffffff;
+}
+
+html.a11y-high-contrast .card,
+html.a11y-high-contrast .modal,
+html.a11y-high-contrast .hero-inner,
+html.a11y-high-contrast .card-looking-box {
+  background: #000000;
+  color: #ffffff;
+  border: 2px solid #ffffff;
+}
+
+html.a11y-high-contrast .brand-title {
+  color: #ffffff;
 }
 
 html.a11y-reduced-motion *,

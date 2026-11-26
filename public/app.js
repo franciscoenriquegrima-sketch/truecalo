@@ -1362,30 +1362,67 @@ function initAccessibility() {
     if (saved) prefs = { ...prefs, ...JSON.parse(saved) };
   } catch {}
 
-  applyA11yPrefs(prefs);
-  $('#a11yLargeText').checked = prefs.largeText;
-  $('#a11yHighContrast').checked = prefs.highContrast;
-  $('#a11yReducedMotion').checked = prefs.reducedMotion;
+  const btnLarge = $('#btnA11yLargeText');
+  const btnContrast = $('#btnA11yHighContrast');
+  const btnSpeech = $('#btnA11ySpeech');
+  const btnMotion = $('#btnA11yReducedMotion');
 
-  function saveAndApply() {
-    prefs = {
-      largeText: $('#a11yLargeText').checked,
-      highContrast: $('#a11yHighContrast').checked,
-      reducedMotion: $('#a11yReducedMotion').checked
-    };
-    localStorage.setItem(A11Y_STORAGE_KEY, JSON.stringify(prefs));
+  function syncUI() {
     applyA11yPrefs(prefs);
+    btnLarge?.classList.toggle('active', prefs.largeText);
+    btnContrast?.classList.toggle('active', prefs.highContrast);
+    btnMotion?.classList.toggle('active', prefs.reducedMotion);
   }
 
+  function save() {
+    localStorage.setItem(A11Y_STORAGE_KEY, JSON.stringify(prefs));
+    syncUI();
+  }
+
+  syncUI();
+
   $('#btnA11yFloat')?.addEventListener('click', () => openModal('a11yModal'));
-  $('#a11yLargeText')?.addEventListener('change', saveAndApply);
-  $('#a11yHighContrast')?.addEventListener('change', saveAndApply);
-  $('#a11yReducedMotion')?.addEventListener('change', saveAndApply);
+  btnLarge?.addEventListener('click', () => {
+    prefs.largeText = !prefs.largeText;
+    save();
+  });
+  btnContrast?.addEventListener('click', () => {
+    prefs.highContrast = !prefs.highContrast;
+    save();
+  });
+  btnMotion?.addEventListener('click', () => {
+    prefs.reducedMotion = !prefs.reducedMotion;
+    save();
+  });
+
+  btnSpeech?.addEventListener('click', () => {
+    if (!('speechSynthesis' in window)) {
+      showToast('Tu navegador no soporta lectura de texto por voz.', true);
+      return;
+    }
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+      btnSpeech.classList.remove('active');
+      showToast('Lectura de texto detenida.');
+      return;
+    }
+    const itemsText = state.items
+      .slice(0, 5)
+      .map(i => `${i.title}, en ${i.location}.`)
+      .join(' ');
+    const summary = `Bienvenido a TRUECALO. Si te interesa, cámbialo. Hay ${state.items.length} objetos mostrados. ${itemsText}`;
+    const utter = new SpeechSynthesisUtterance(summary);
+    utter.lang = 'es-ES';
+    utter.onend = () => btnSpeech.classList.remove('active');
+    btnSpeech.classList.add('active');
+    window.speechSynthesis.speak(utter);
+  });
+
   $('#btnA11yReset')?.addEventListener('click', () => {
-    $('#a11yLargeText').checked = false;
-    $('#a11yHighContrast').checked = false;
-    $('#a11yReducedMotion').checked = false;
-    saveAndApply();
+    prefs = { largeText: false, highContrast: false, reducedMotion: false };
+    window.speechSynthesis?.cancel();
+    btnSpeech?.classList.remove('active');
+    save();
     showToast('Opciones de accesibilidad restablecidas.');
   });
 }
