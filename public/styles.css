@@ -191,6 +191,11 @@ body {
   background: var(--primary-soft);
 }
 
+.btn-touch {
+  min-width: 44px;
+  min-height: 44px;
+}
+
 /* Buttons */
 .btn {
   display: inline-flex;
@@ -888,8 +893,8 @@ textarea {
   position: absolute;
   top: 14px;
   right: 14px;
-  width: 34px;
-  height: 34px;
+  min-width: 44px;
+  min-height: 44px;
   border-radius: 50%;
   border: 1px solid var(--border);
   background: var(--surface);
@@ -970,8 +975,8 @@ textarea {
   top: 10px;
   right: 10px;
   z-index: 4;
-  width: 36px;
-  height: 36px;
+  min-width: 44px;
+  min-height: 44px;
   border-radius: 50%;
   border: none;
   background: rgba(17, 24, 39, 0.72);
@@ -997,8 +1002,8 @@ textarea {
   top: 16px;
   right: 16px;
   z-index: 260;
-  width: 42px;
-  height: 42px;
+  min-width: 44px;
+  min-height: 44px;
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.25);
   background: rgba(17, 24, 39, 0.8);
