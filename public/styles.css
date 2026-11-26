@@ -569,6 +569,107 @@ textarea {
   color: var(--text);
 }
 
+/* Matches For You Module */
+.matches-module {
+  margin-bottom: 24px;
+  padding: 18px 20px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(0, 214, 143, 0.1) 0%, rgba(0, 184, 255, 0.08) 100%);
+  border: 1px solid rgba(0, 184, 255, 0.35);
+}
+
+.matches-module-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.matches-module-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.matches-sub {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.matches-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.match-pair-card {
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px 16px;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--text);
+  min-height: 44px;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.match-pair-card:hover {
+  transform: translateY(-2px);
+  border-color: #00B8FF;
+  box-shadow: var(--shadow);
+}
+
+.match-pair-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  margin-bottom: 8px;
+}
+
+.match-pair-pct {
+  font-weight: 800;
+  color: #047857;
+}
+
+html.dark .match-pair-pct {
+  color: #34d399;
+}
+
+.match-pair-loc {
+  color: var(--muted);
+}
+
+.match-pair-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 0.94rem;
+}
+
+.match-mine {
+  color: var(--primary);
+}
+
+.match-arrow {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00D68F 0%, #00B8FF 100%);
+  color: #fff;
+  flex-shrink: 0;
+  font-size: 0.9rem;
+}
+
 .catalog-heading-row {
   margin: 4px 0 14px;
   display: flex;

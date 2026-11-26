@@ -191,7 +191,48 @@ async function loadItems() {
   } else {
     state.myAvailableItems = [];
   }
+  renderMatchesModule();
   renderItems();
+}
+
+function renderMatchesModule() {
+  const mod = $('#matchesModule');
+  const grid = $('#matchesGrid');
+  if (!mod || !grid) return;
+
+  const matches = state.items
+    .map(item => {
+      const m = computeBestMatch(item, state.myAvailableItems);
+      return m ? { item, ...m } : null;
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3);
+
+  if (!matches.length) {
+    mod.classList.add('hidden');
+    grid.innerHTML = '';
+    return;
+  }
+
+  mod.classList.remove('hidden');
+  grid.innerHTML = matches
+    .map(
+      m => `
+      <button type="button" class="match-pair-card" data-match-item="${m.item.id}">
+        <div class="match-pair-top">
+          <span class="match-pair-pct">🤖 ${m.score}% coincidencia</span>
+          <span class="match-pair-loc">📍 ${escapeHtml(m.item.location)}</span>
+        </div>
+        <div class="match-pair-row">
+          <span class="match-mine">Tu ${escapeHtml(m.myItem.title)}</span>
+          <span class="match-arrow" aria-hidden="true">↔</span>
+          <span class="match-theirs">${escapeHtml(m.item.title)}</span>
+        </div>
+      </button>
+    `
+    )
+    .join('');
 }
 
 async function loadTrades() {
@@ -1039,6 +1080,11 @@ function bindEvents() {
   $('#itemsGrid').addEventListener('click', e => {
     const card = e.target.closest('.card');
     if (card) openItemDetail(card.dataset.itemId);
+  });
+
+  $('#matchesGrid')?.addEventListener('click', e => {
+    const card = e.target.closest('.match-pair-card');
+    if (card) openItemDetail(card.dataset.matchItem);
   });
 
   // Publish modal
