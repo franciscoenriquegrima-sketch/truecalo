@@ -571,6 +571,17 @@ textarea {
 
 .catalog-heading-row {
   margin: 4px 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.local-town-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .catalog-heading {

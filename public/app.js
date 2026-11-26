@@ -9,7 +9,8 @@ const state = {
     category: 'Todas',
     type: 'todos',
     status: 'disponible',
-    nearMe: false
+    nearMe: false,
+    location: ''
   },
   activeTab: 'received',
   uploadedImageDataUrl: '',
@@ -173,7 +174,9 @@ async function loadItems() {
   if (state.filters.category !== 'Todas') params.set('category', state.filters.category);
   if (state.filters.type !== 'todos') params.set('type', state.filters.type);
   if (state.filters.status) params.set('status', state.filters.status);
-  if (state.filters.nearMe) {
+  if (state.filters.location) {
+    params.set('location', state.filters.location);
+  } else if (state.filters.nearMe) {
     const city = getUserCityKeyword();
     if (city && city.toLowerCase() !== 'sin ubicación') {
       params.set('location', city);
@@ -1000,13 +1003,34 @@ function bindEvents() {
     loadItems();
   });
 
+  $('#localTownPills')?.addEventListener('click', e => {
+    const btn = e.target.closest('.town-pill');
+    if (!btn) return;
+    const town = btn.dataset.town;
+    const isSame = state.filters.location === town;
+    state.filters.location = isSame ? '' : town;
+    state.filters.nearMe = false;
+    $('#btnNearMe')?.classList.remove('active');
+    $('#btnNearMe').textContent = '📍 Ver objetos cerca de mí';
+    $$('#localTownPills .town-pill').forEach(p => p.classList.toggle('active', p.dataset.town === state.filters.location));
+    const heading = $('#catalogHeading');
+    if (heading) {
+      heading.textContent = state.filters.location ? `🔥 Cerca de ${state.filters.location}` : '🔥 Cerca de ti';
+    }
+    loadItems();
+  });
+
   $('#btnEmptyReset').addEventListener('click', () => {
-    state.filters = { q: '', category: 'Todas', type: 'todos', status: 'disponible', nearMe: false };
+    state.filters = { q: '', category: 'Todas', type: 'todos', status: 'disponible', nearMe: false, location: '' };
     $('#searchInput').value = '';
+    $('#heroSearchInput').value = '';
     $('#typeFilter').value = 'todos';
     $('#statusFilter').value = 'disponible';
     $('#btnNearMe').classList.remove('active');
     $('#btnNearMe').textContent = '📍 Ver objetos cerca de mí';
+    $$('#localTownPills .town-pill').forEach(p => p.classList.remove('active'));
+    const heading = $('#catalogHeading');
+    if (heading) heading.textContent = '🔥 Cerca de ti';
     $$('#categoryPills .pill').forEach(p => p.classList.toggle('active', p.dataset.category === 'Todas'));
     loadItems();
   });

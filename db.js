@@ -126,10 +126,38 @@ function createSeedData() {
       condition: 'Como nuevo',
       type: 'trueque',
       lookingFor: 'Macetas de cerámica, cuadros o auriculares',
-      location: 'Valencia · Ruzafa',
+      location: 'Zaragoza · Centro',
       imageUrl: 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=800&q=80',
       status: 'disponible',
       createdAt: '2026-11-20T12:00:00.000Z'
+    },
+    {
+      id: 'itm_herramientas',
+      ownerId: 'usr_carlos',
+      title: 'Maletín de herramientas 64 piezas',
+      description: 'Llaves de vaso, destornilladores y alicates casi sin uso. Ideal para bricolaje en casa o taller.',
+      category: 'Herramientas',
+      condition: 'Como nuevo',
+      type: 'trueque',
+      lookingFor: 'Taladro inalámbrico o bici infantil',
+      location: 'Calatayud',
+      imageUrl: 'https://images.unsplash.com/photo-1581147036324-c17ac41dfa6c?auto=format&fit=crop&w=800&q=80',
+      status: 'disponible',
+      createdAt: '2026-11-22T15:00:00.000Z'
+    },
+    {
+      id: 'itm_cesta',
+      ownerId: 'usr_ana',
+      title: 'Cesta de mimbre artesanal para bici o picnic',
+      description: 'Muy resistente, hecha a mano. Perfecta para paseos o decoración rústica.',
+      category: 'Hogar',
+      condition: 'Buen estado',
+      type: 'regalo',
+      lookingFor: '¡Gratis! Segunda vida en la comarca',
+      location: 'Villarroya de la Sierra',
+      imageUrl: 'https://images.unsplash.com/photo-1590736969955-71cc94901144?auto=format&fit=crop&w=800&q=80',
+      status: 'disponible',
+      createdAt: '2026-11-24T10:00:00.000Z'
     }
   ];
 
